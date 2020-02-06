@@ -10,7 +10,8 @@ using System.IO;
 public class DataSet
 {
 	private List<Voxel> voxels = new List<Voxel>();
-	private static CultureInfo culture = new CultureInfo("");
+	private static readonly CultureInfo culture = new CultureInfo("");
+	public readonly double voxelSize;
 	/// <summary>
 	/// Parses the file and generates Voxels and Points in the process
 	/// </summary>
@@ -22,6 +23,8 @@ public class DataSet
 		culture.NumberFormat.NumberDecimalDigits = 2;
 		culture.NumberFormat.NumberDecimalSeparator = ".";
 		culture.NumberFormat.NumberGroupSeparator = ",";
+
+		this.voxelSize = voxelSize;
 
 		string path = filepath+filename;
 		StreamReader reader = new StreamReader(path);
@@ -83,9 +86,29 @@ public class DataSet
 		return double.Parse(num, NumberStyles.Number | NumberStyles.AllowExponent, culture);
 	}
 
-	public Point GetPoint()
+	public Point GetPoint(double[] pos)
 	{
-		Point p = null;// TODO: interpolate
+		Voxel origin = null;
+	   foreach(Voxel v in voxels)
+		{
+			if(v.IsPointInside(pos))
+			{
+				origin = v;
+				break;
+			}
+		}
+		if (origin == null)
+			throw new Exception("Point is outside of known boundary!");
+		List<Point> dataset = new List<Point>();
+		dataset.AddRange(origin.GetPoints());
+		foreach(Voxel v in voxels)
+		{
+			if (!v.Equals(origin) && v.IsNeighbor(origin.boundary))
+			{
+				dataset.AddRange(v.GetPoints());
+			}
+		}
+		Point p = Interpolator.Interpolate(pos, dataset, voxelSize);
 		return p;
 	}
 }

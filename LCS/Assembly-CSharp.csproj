@@ -62,6 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\code\Advection.cs" />
     <Compile Include="Assets\code\DataSet.cs" />
     <Compile Include="Assets\code\Interpolator.cs" />
     <Compile Include="Assets\code\Point.cs" />

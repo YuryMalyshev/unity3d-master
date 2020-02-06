@@ -19,6 +19,11 @@ public class Point : IEquatable<Point>, IComparer<Point>, IComparable<Point>
 		this.vel = vel;
 	}
 
+	/// <summary>
+	/// Compare point positions
+	/// </summary>
+	/// <param name="other"></param>
+	/// <returns></returns>
 	public bool Equals(Point other)
 	{
 		return this.pos.Equals(other.pos);

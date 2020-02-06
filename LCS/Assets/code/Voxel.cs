@@ -52,6 +52,29 @@ public class Voxel
 					(p.pos[2] < boundary[5] && p.pos[2] >= boundary[2]);
 	}
 
+	public bool IsPointInside(double[] pos)
+	{
+		return (pos[0] < boundary[3] && pos[0] >= boundary[0]) &&
+					(pos[1] < boundary[4] && pos[1] >= boundary[1]) &&
+					(pos[2] < boundary[5] && pos[2] >= boundary[2]);
+	}
+
+	public bool IsNeighbor(double[] boundary)
+	{
+		if (boundary.Length != this.boundary.Length)
+			throw new Exception("Not the boundary!");
+
+		for(int i = 0; i < this.boundary.Length; i++)
+		{
+			for(int j = 0; j < boundary.Length; j++)
+			{
+				if (this.boundary[i] == boundary[j])
+					return true;
+			}
+		}
+		return false;
+	}
+
 	public int Size()
 	{
 		return points.Count;
