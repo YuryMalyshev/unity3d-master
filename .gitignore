@@ -1,3 +1,6 @@
 LCS/Library/metadata
 LCS/Library/PackageCache
 LCS/Library/ShaderCache
+LCS/Temp
+LCS/.vs/LCS
+LCS/obj/Debug
