@@ -66,6 +66,7 @@
     <Compile Include="Assets\code\DataSet.cs" />
     <Compile Include="Assets\code\Interpolator.cs" />
     <Compile Include="Assets\code\Point.cs" />
+    <Compile Include="Assets\code\StartUp.cs" />
     <Compile Include="Assets\code\Voxel.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/UnityWS/unity3d-master/LCS/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
