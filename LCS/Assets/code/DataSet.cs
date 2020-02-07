@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using UnityEngine;
 
 /// <summary>
 /// DataSet stores all the voxels, which store data points.
@@ -27,6 +28,7 @@ public class DataSet
 		this.voxelSize = voxelSize;
 
 		string path = filepath+filename;
+		Debug.Log(path);
 		StreamReader reader = new StreamReader(path);
 		while (!reader.EndOfStream)
 		{
@@ -47,13 +49,17 @@ public class DataSet
 				{
 					v = new Voxel(p.pos[0] - voxelSize / 2, p.pos[1] - voxelSize / 2, p.pos[2] - voxelSize / 2,
 											p.pos[0] + voxelSize / 2, p.pos[1] + voxelSize / 2, p.pos[2] + voxelSize / 2);
+					//Debug.Log("Created Voxel at pos " + v.boundary[0] + " " + v.boundary[1] + " " + v.boundary[2]);
+					//Debug.Log("For point " + p.pos[0] + " " + p.pos[1]);
 				}
 				else
 				{
-					double x = Math.Floor(p.pos[0] / voxelSize) * voxelSize + voxels[0].boundary[0];
-					double y = Math.Floor(p.pos[1] / voxelSize) * voxelSize + voxels[0].boundary[1];
-					double z = Math.Floor(p.pos[2] / voxelSize) * voxelSize + voxels[0].boundary[2];
+					double x = Math.Round(p.pos[0] / voxelSize) * voxelSize + voxels[0].boundary[0];
+					double y = Math.Round(p.pos[1] / voxelSize) * voxelSize + voxels[0].boundary[1];
+					double z = Math.Round(p.pos[2] / voxelSize) * voxelSize + voxels[0].boundary[2];
 					v = new Voxel(x, y, z , x + voxelSize, y + voxelSize, z + voxelSize);
+					//Debug.Log("Created Voxel at pos " + x + " " + y + " " + z);
+					//Debug.Log("For point " + p.pos[0] + " " + p.pos[1]);
 				}
 				v.AddPoint(p);
 				voxels.Add(v);
@@ -84,6 +90,16 @@ public class DataSet
 	private double ParseDouble(string num)
 	{
 		return double.Parse(num, NumberStyles.Number | NumberStyles.AllowExponent, culture);
+	}
+
+	public List<Point> GetPoints()
+	{
+		List<Point> points = new List<Point>();
+		foreach(Voxel v in voxels)
+		{
+			points.AddRange(v.GetPoints());
+		}
+		return points;
 	}
 
 	public Point GetPoint(double[] pos)
