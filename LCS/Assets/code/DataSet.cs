@@ -12,6 +12,7 @@ public class DataSet
 {
 	private List<Voxel> voxels = new List<Voxel>();
 	private static readonly CultureInfo culture = new CultureInfo("");
+
 	public readonly double voxelSize;
 	/// <summary>
 	/// Parses the file and generates Voxels and Points in the process
@@ -102,9 +103,42 @@ public class DataSet
 		return points;
 	}
 
+	public Point GetPoint(double[] pos, bool simple)
+	{
+		if(simple)
+		{
+			return Interpolator.Interpolate(pos, GetPoints(), voxelSize);
+		}
+		else
+		{
+			return GetPoint(pos);
+		}
+	}
 	public Point GetPoint(double[] pos)
 	{
-		Voxel origin = null;
+		List<Voxel> local = new List<Voxel>();
+		foreach (Voxel v in voxels)
+		{
+			if (v.IsPointInside(pos))
+			{
+				local.Add(v);
+				break;
+			}
+		}
+		if (local.Count == 0)
+			throw new Exception("Point is outside of known boundary!");
+
+		foreach (Voxel v in voxels)
+		{
+			if (!v.Equals(local[0]) && v.IsNeighbor(local[0].boundary))
+			{
+				local.Add(v);
+			}
+		}
+
+		Point p = Interpolator.Interpolate(pos, local, voxelSize);
+		return p;
+		/*Voxel origin = null;
 	   foreach(Voxel v in voxels)
 		{
 			if(v.IsPointInside(pos))
@@ -124,7 +158,12 @@ public class DataSet
 				dataset.AddRange(v.GetPoints());
 			}
 		}
-		Point p = Interpolator.Interpolate(pos, dataset, voxelSize);
-		return p;
+		System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+		sw.Start();
+		Point p = Interpolator.Interpolate(pos, GetPoints(), voxelSize);
+		sw.Stop();
+		Debug.Log("Elapsed Time is {" + sw.ElapsedMilliseconds + "} ms");
+		//Point p = Interpolator.Interpolate(pos, dataset, voxelSize);
+		return p;*/
 	}
 }
