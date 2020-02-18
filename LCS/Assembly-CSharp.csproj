@@ -65,10 +65,13 @@
     <Compile Include="Assets\code\Advection.cs" />
     <Compile Include="Assets\code\DataSet.cs" />
     <Compile Include="Assets\code\Interpolator.cs" />
+    <Compile Include="Assets\code\Painter.cs" />
     <Compile Include="Assets\code\Point.cs" />
+    <Compile Include="Assets\code\Seed.cs" />
     <Compile Include="Assets\code\StartUp.cs" />
     <Compile Include="Assets\code\Test.cs" />
     <Compile Include="Assets\code\Voxel.cs" />
+    <Compile Include="Assets\TestIntst.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/UnityWS/unity3d-master/LCS/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>

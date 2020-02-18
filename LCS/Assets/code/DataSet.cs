@@ -55,9 +55,9 @@ public class DataSet
 				}
 				else
 				{
-					double x = Math.Round(p.pos[0] / voxelSize) * voxelSize + voxels[0].boundary[0];
-					double y = Math.Round(p.pos[1] / voxelSize) * voxelSize + voxels[0].boundary[1];
-					double z = Math.Round(p.pos[2] / voxelSize) * voxelSize + voxels[0].boundary[2];
+					double x = Math.Ceiling(p.pos[0] / voxelSize) * voxelSize + voxels[0].boundary[0];
+					double y = Math.Ceiling(p.pos[1] / voxelSize) * voxelSize + voxels[0].boundary[1];
+					double z = Math.Ceiling(p.pos[2] / voxelSize) * voxelSize + voxels[0].boundary[2];
 					v = new Voxel(x, y, z , x + voxelSize, y + voxelSize, z + voxelSize);
 					//Debug.Log("Created Voxel at pos " + x + " " + y + " " + z);
 					//Debug.Log("For point " + p.pos[0] + " " + p.pos[1]);

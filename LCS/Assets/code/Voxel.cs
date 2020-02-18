@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Voxel
 {
@@ -47,13 +48,18 @@ public class Voxel
 	/// <returns></returns>
 	public bool IsPointInside(Point p)
 	{
-		return (p.pos[0] < boundary[3] && p.pos[0] >= boundary[0]) &&
-					(p.pos[1] < boundary[4] && p.pos[1] >= boundary[1]) &&
-					(p.pos[2] < boundary[5] && p.pos[2] >= boundary[2]);
+		return IsPointInside(p.pos);
 	}
 
 	public bool IsPointInside(double[] pos)
 	{
+		/*if(pos[0] == 0.25)
+		{
+			Debug.Log("Point at Y " + pos[1] + " is inside " + boundary[0] + " " + boundary[3] + " and " + boundary[1] + " " + boundary[4] + "? " + 
+			((pos[0] < boundary[3] && pos[0] >= boundary[0]) &&
+					(pos[1] < boundary[4] && pos[1] >= boundary[1]) &&
+					(pos[2] < boundary[5] && pos[2] >= boundary[2])));
+		}*/
 		return (pos[0] < boundary[3] && pos[0] >= boundary[0]) &&
 					(pos[1] < boundary[4] && pos[1] >= boundary[1]) &&
 					(pos[2] < boundary[5] && pos[2] >= boundary[2]);

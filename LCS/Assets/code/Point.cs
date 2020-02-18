@@ -45,4 +45,9 @@ public class Point : IEquatable<Point>, IComparer<Point>, IComparable<Point>
 		return "[" + pos[0] + ", " + pos[1] + ", " + pos[2] + "]" +
 		"[" + vel[0] + ", " + vel[1] + ", " + vel[2] + "]";
 	}
+
+	public Point Clone()
+	{
+		return new Point(pos[0], pos[1], pos[2], vel[0], vel[1], vel[2]);
+	}
 }
