@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Point : IEquatable<Point>, IComparer<Point>, IComparable<Point>
 {
-	public readonly double[] pos;
+	public readonly Vector3 pos;
 	public readonly double[] vel;
 
 	public Point(double x, double y, double z, double vx, double vy, double vz)
 	{
-		double[] pos = { x, y, z };
+		Vector3 pos = new Vector3((float)x, (float)y, (float)z);
 		this.pos = pos;
 		double[] vel = { vx, vy, vz };
 		this.vel = vel;
 	}
 	public Point(double[] pos, double[] vel)
 	{
-		this.pos = pos;
+		this.pos = new Vector3((float)pos[0], (float)pos[1], (float)pos[2]);
 		this.vel = vel;
 	}
 
@@ -26,7 +27,7 @@ public class Point : IEquatable<Point>, IComparer<Point>, IComparable<Point>
 	/// <returns></returns>
 	public bool Equals(Point other)
 	{
-		return this.pos.Equals(other.pos);
+		return pos.Equals(other.pos);
 	}
 
 	public int Compare(Point x, Point y)
@@ -42,12 +43,12 @@ public class Point : IEquatable<Point>, IComparer<Point>, IComparable<Point>
 
 	public override string ToString()
 	{
-		return "[" + pos[0] + ", " + pos[1] + ", " + pos[2] + "]" +
+		return "[" + pos.x + ", " + pos.y + ", " + pos.z + "]" +
 		"[" + vel[0] + ", " + vel[1] + ", " + vel[2] + "]";
 	}
 
 	public Point Clone()
 	{
-		return new Point(pos[0], pos[1], pos[2], vel[0], vel[1], vel[2]);
+		return new Point(pos.x, pos.y, pos.z, vel[0], vel[1], vel[2]);
 	}
 }

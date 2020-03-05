@@ -145,17 +145,21 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 183156437}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88e1fc5c43a63f744a6a2d8fae062258, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   PointPrefab: {fileID: 2006192385862245642, guid: 4fa8e25ee9cc6b74fa4b50c9a69e08e3,
     type: 3}
-  StartAdvection: 0
-  steps: 100
-  dt: 0.15
-  radius: 0.01
+  loaddata: 0
+  datafolder: D:/UnityWS/AdvectionCalc/AdvectionCalc/bin/Debug/output/
+  debug: 0
+  debugline: '*'
+  draw: 0
+  resolution: 0.05
+  MAX_OVERRIDE: NaN
+  MIN_OVERRIDE: NaN
 --- !u!4 &183156439
 Transform:
   m_ObjectHideFlags: 0
@@ -177,11 +181,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 183156437}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 919e3ddb81918e243b526575d76171a6, type: 3}
+  m_Script: {fileID: 11500000, guid: 57e316dd047cf5e45a87e9980d312385, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shader: {fileID: 4800000, guid: 76f6b288c8d9595499cba599b471c5c2, type: 3}
+  level: -15
+  redraw: 0
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -255,7 +262,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 2.75508e-40, w: -7.61e-43}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -365,7 +372,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1133018944}
-  - component: {fileID: 1133018945}
   - component: {fileID: 1133018946}
   m_Layer: 0
   m_Name: Painter
@@ -388,20 +394,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1133018945
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1133018943}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b7a511bb6903df48b5c95fa59dd4970, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PointPrefab: {fileID: 2006192385862245642, guid: 4fa8e25ee9cc6b74fa4b50c9a69e08e3,
-    type: 3}
 --- !u!114 &1133018946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -409,7 +401,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1133018943}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d079996f50dbda48bb81044fd122a4b, type: 3}
   m_Name: 

@@ -33,16 +33,20 @@ public class Painter : MonoBehaviour
 					double[] pos = (double[])resultList[0];
 					string id = (string)resultList[1];
 					Color color = (Color)resultList[2];
+					double scale = (double)resultList[3];
 					GameObject go;
 					if (gameobjects.TryGetValue(id, out go))
 					{
 						go.transform.position = new Vector3((float)pos[0], (float)pos[1], (float)pos[2]);
+						go.transform.localScale = new Vector3((float)scale, (float)scale, (float)scale);
+						go.GetComponent<Renderer>().material.color = color;
 					}
 					else
 					{
 						go = Instantiate(PointPrefab);
 						go.name = id;
 						go.transform.position = new Vector3((float)pos[0], (float)pos[1], (float)pos[2]);
+						go.transform.localScale = new Vector3((float)scale, (float)scale, (float)scale);
 						go.GetComponent<Renderer>().material.color = color;
 						gameobjects.Add(id, go);
 					}
@@ -57,6 +61,7 @@ public class Painter : MonoBehaviour
 
 	public void UpdateObject(List<object> PosNameAndColor)
 	{
+		//Debug.Log("Adding new object");
 		toBeUpdated.Enqueue(PosNameAndColor);
 	}
 
