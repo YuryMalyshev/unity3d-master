@@ -11,9 +11,14 @@ class Surface
 	List<Triangle> triangles;
 	public GameObject surface = null;
 	public static Shader shader;
+	private Vector3[] vertices;
+	private Color[] colors;
+	private int[] meshtriangles;
+
 	public Surface()
 	{
 		triangles = new List<Triangle>();
+		surface = new GameObject("" + triangles.Count, typeof(MeshFilter), typeof(MeshRenderer));
 	}
 
 	public Surface(Triangle t)
@@ -44,18 +49,12 @@ class Surface
 
 	public void Make()
 	{
-		if (surface == null)
-		{
-			surface = new GameObject("" + triangles.Count, typeof(MeshFilter), typeof(MeshRenderer));
-		}
-		else
-		{
-			surface.name = "" + triangles.Count;
-		}
-
-		//update only needed vertices, colors and triangles
 		List<Seed> seedVertices = new List<Seed>();
-		int[] meshtriangles = new int[triangles.Count * 6];
+		//update only needed vertices, colors and triangles
+
+		
+
+		meshtriangles = new int[triangles.Count * 6];
 		int iter = 0;
 		foreach(Triangle t in triangles)
 		{
@@ -85,24 +84,22 @@ class Surface
 			iter++;
 		}
 
-		Vector3[] vertices = new Vector3[seedVertices.Count];
-		Color[] colors = new Color[seedVertices.Count];
+		vertices = new Vector3[seedVertices.Count];
+		colors = new Color[seedVertices.Count];
 		for (int i = 0; i < seedVertices.Count; i++)
 		{
 			vertices[i] = seedVertices[i].pos;
 			colors[i] = Color.Lerp(Color.red, Color.blue, (float)((seedVertices[i].FTLE + 20.83) / 9.62));
 		}
+	}
 
-
+	public void ApplyChange()
+	{
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices;
 		mesh.triangles = meshtriangles;
-		mesh.SetColors(colors.ToList());
-
-		
-
-
-
+		mesh.colors = colors;
+		surface.name = "" + triangles.Count;
 		surface.GetComponent<MeshRenderer>().material = new Material(shader);
 		surface.GetComponent<MeshFilter>().mesh = mesh;
 	}

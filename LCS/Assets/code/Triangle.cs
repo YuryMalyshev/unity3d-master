@@ -78,7 +78,7 @@ namespace Assets.code
 				}
 			}
 			bool equal = cnt.Values.All(c => c == 0);
-			Debug.Log(one + " EqualTo " + other + " " + equal);
+			//Debug.Log(one + " EqualTo " + other + " " + equal);
 			return equal;
 		}
 	}

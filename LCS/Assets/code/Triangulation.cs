@@ -26,6 +26,7 @@ public class Triangulation : MonoBehaviour
 	public double levelMin = 0;
 	public double levelMax = 0;
 	public bool redraw = false;
+	private bool done = false;
 	FTLEField f;
 	void Start()
 	{
@@ -56,77 +57,92 @@ public class Triangulation : MonoBehaviour
 	{
 		if (redraw)
 		{
-			triangles.Clear();
-			foreach (List<Seed> ls in seeds)
-			{
-				foreach (Seed s in ls)
-				{
-					s.ResetUse();
-				}
-			}
-
-			for (int i = 0; i < seeds.Count; i++)
-			{
-				for (int j = 0; j < seeds[0].Count; j++)
-				{
-					List<Triangle> created = new List<Triangle>(8);
-					Seed A = seeds[i][j];
-					if (A.FTLE >= levelMin && A.FTLE <= levelMax)
-					{ 
-						//Debug.Log("=============" + A.pos + "=============");
-						Seed B = null;
-						Seed C = null;
-
-						for (int k = 0; k < 9; k++)
-						{
-							int nx = i + order[k, 0];
-							int ny = j + order[k, 1];
-							//Debug.Log("Test [" + nx + "][" + ny + "]");
-							if (nx > -1 && ny > -1 && nx < seeds.Count && ny < seeds[0].Count && (nx != i || ny != j))
-							{
-								//Debug.Log("Test point " + seeds[nx][ny].pos.ToString() + " value " + seeds[nx][ny].FTLE);
-								if (seeds[nx][ny].FTLE >= levelMin && seeds[nx][ny].FTLE <= levelMax)
-								{
-									B = seeds[nx][ny];
-								}
-							}
-							//Debug.Log("[" + (B != null ? B.pos.ToString() : "null") + "]" + 
-							//			 "[" + (C != null ? C.pos.ToString() : "null") + "]");
-							if (B != null && C != null)
-							{
-
-								if (A != B && B != C && A != C)
-								{
-									//Debug.Log("[" + B.pos.ToString() + "]" +
-									//						"[" + C.pos.ToString() + "]");
-									//Debug.Log(A.IsInUse() + " " + B.IsInUse() + " " + C.IsInUse());
-									if (!A.IsInUse() || !B.IsInUse() || !C.IsInUse())
-									{
-										Triangle t = new Triangle(A, B, C);
-										created.Add(t);
-									}
-								}
-								else
-								{
-									Debug.Log("Points are equal");
-								}
-							}
-							C = B;
-							B = null;
-						}
-						foreach (Triangle t in created)
-						{
-							t.Accept();
-							triangles.Add(t);
-						}
-						
-					}
-				}
-			}
-			surface.UpdateTriangles(triangles);
-			surface.Make();
+			Thread thread = new Thread(ReavalutateSurface);
+			thread.Start();
 			redraw = false;
-			Debug.Log("Done!");
+		}
+
+		if (done)
+		{
+			surface.ApplyChange();
+			done = false;
 		}
 	}
+
+	private void ReavalutateSurface()
+	{
+		triangles.Clear();
+		foreach (List<Seed> ls in seeds)
+		{
+			foreach (Seed s in ls)
+			{
+				s.ResetUse();
+			}
+		}
+
+		for (int i = 0; i < seeds.Count; i++)
+		{
+			for (int j = 0; j < seeds[0].Count; j++)
+			{
+				List<Triangle> created = new List<Triangle>(8);
+				Seed A = seeds[i][j];
+				if (A.FTLE >= levelMin && A.FTLE <= levelMax)
+				{
+					//Debug.Log("=============" + A.pos + "=============");
+					Seed B = null;
+					Seed C = null;
+
+					for (int k = 0; k < 9; k++)
+					{
+						int nx = i + order[k, 0];
+						int ny = j + order[k, 1];
+						//Debug.Log("Test [" + nx + "][" + ny + "]");
+						if (nx > -1 && ny > -1 && nx < seeds.Count && ny < seeds[0].Count && (nx != i || ny != j))
+						{
+							//Debug.Log("Test point " + seeds[nx][ny].pos.ToString() + " value " + seeds[nx][ny].FTLE);
+							if (seeds[nx][ny].FTLE >= levelMin && seeds[nx][ny].FTLE <= levelMax)
+							{
+								B = seeds[nx][ny];
+							}
+						}
+						//Debug.Log("[" + (B != null ? B.pos.ToString() : "null") + "]" + 
+						//			 "[" + (C != null ? C.pos.ToString() : "null") + "]");
+						if (B != null && C != null)
+						{
+
+							if (A != B && B != C && A != C)
+							{
+								//Debug.Log("[" + B.pos.ToString() + "]" +
+								//						"[" + C.pos.ToString() + "]");
+								//Debug.Log(A.IsInUse() + " " + B.IsInUse() + " " + C.IsInUse());
+								if (!A.IsInUse() || !B.IsInUse() || !C.IsInUse())
+								{
+									Triangle t = new Triangle(A, B, C);
+									created.Add(t);
+								}
+							}
+							else
+							{
+								Debug.Log("Points are equal");
+							}
+						}
+						C = B;
+						B = null;
+					}
+					foreach (Triangle t in created)
+					{
+						t.Accept();
+						triangles.Add(t);
+					}
+
+				}
+			}
+		}
+		surface.UpdateTriangles(triangles);
+		
+		Debug.Log("Done!");
+		surface.Make();
+		done = true;
+	}
+
 }
