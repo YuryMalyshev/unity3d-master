@@ -16,19 +16,16 @@ namespace AdvectionCalculationsGUI
 {
 	public partial class GUI : Form
 	{
+		// graphics
 		private readonly Pen dotPen;
 		private readonly Pen linePen;
 		private readonly Pen pointerPen;
+
 		private Bitmap completeBackground;
-		private Graphics graphics;
-		private bool dataLoaded = false;
+		private Bitmap lastFrame;
+		private Bitmap newFrame;
 		private List<Point> pointsToDraw;
-
-		private List<Point> line = new List<Point>();
-
-		private FTLEDataSet fds;
-		private InputDataSet ids;
-
+		private List<List<Point>> lines = new List<List<Point>> ();
 
 		double xMin = 0;
 		double xMax = 0;
@@ -42,32 +39,54 @@ namespace AdvectionCalculationsGUI
 		private int snapDist;
 		private bool snap = false;
 
+		// Data
+		private FTLEDataSet fds;
+		private InputDataSet ids;
+		private bool dataLoaded = false;
+
 		public GUI()
 		{
+			// Initialize
 			InitializeComponent();
 			ResetFields();
+			fieldNormilizerWorker.WorkerReportsProgress = true;
+			this.progressBar.Maximum = 1000;
 
-			(this.canvas_data as Control).KeyDown += new KeyEventHandler(CanvasKeyDown);
-			(this.canvas_data as Control).KeyUp += new KeyEventHandler(CanvasKeyUp);
-
-			dotPen = new Pen(Color.Black, 2);
-			linePen = new Pen(Color.Green, 2);
-			pointerPen = new Pen(Color.Red, 5);
-			snapDist = (int)(pointerPen.Width * 4);
-			pointsToDraw = new List<Point>();
-
+			// Create tooltips
 			ToolTip tooltip_avDistance = new ToolTip();
 			tooltip_avDistance.ShowAlways = true;
 			tooltip_avDistance.SetToolTip(label_avDistance, "Estimated average distance between points");
 
-			backgroundWorker1.WorkerReportsProgress = true;
+			// Add keyboard handlers to the canvas
+			(this.canvas as Control).KeyDown += new KeyEventHandler(CanvasKeyDown);
+			(this.canvas as Control).KeyUp += new KeyEventHandler(CanvasKeyUp);
+
+			// Create pens
+			dotPen = new Pen(Color.Black, 2);
+			linePen = new Pen(Color.Green, 2);
+			pointerPen = new Pen(Color.Red, 5);
+
+			// Set snapping distance
+			snapDist = (int)(pointerPen.Width * 4);
+
+			// List of points which will be actually drawn
+			pointsToDraw = new List<Point>();
 		}
 
+		Stopwatch sw = new Stopwatch();
+
+		private void GUI_Load(object sender, EventArgs e)
+		{
+			lines.Add(new List<Point>());
+		}
+
+		/// <summary>
+		/// Action Perfromed on "Select Data" click. Opens a dialog for file selection; resets state of the GUI
+		/// </summary>
 		private void SelectInputFile_Click(object sender, EventArgs e)
 		{
 			if (selectDataDalog.ShowDialog() == DialogResult.OK)
 			{
-				Debug.WriteLine("Selected " + selectDataDalog.FileName);
 				// Update/Reset fields
 				this.label_filename.Text = selectDataDalog.SafeFileName;
 				ResetFields();
@@ -84,21 +103,20 @@ namespace AdvectionCalculationsGUI
 			}
 		}
 
-		private void GUI_Load(object sender, EventArgs e)
-		{
-			this.progressBar.Maximum = 1000;
-		}
-
+		/// <summary>
+		/// Action Perfromed on "Load Data" click. Loads the data from text file and then draws it on canvas.
+		/// </summary>
 		private void LoadData_Click(object sender, EventArgs e)
 		{
 			this.outputSettingsPanel.Enabled = true; //TODO: reset values
 			ids = new InputDataSet(selectDataDalog.FileName, double.Parse(voxelSize.Text));
 			List<Point> points = ids.GetPoints();
-			double maxDist = double.Parse(this.avDistance.Text) * (15000f / ids.GetPoints().Count * 10);
+			//TODO: based on amount
+			double maxDist = double.Parse(this.avDistance.Text) * (15000f / points.Count * 10);
 			pointsToDraw.Clear();
-			foreach (Point p in ids.GetPoints())
+			foreach (Point p in points)
 			{
-				//TODO: based on amount
+				
 				double localMin = double.PositiveInfinity;
 				foreach(Point pd in pointsToDraw)
 				{
@@ -117,14 +135,16 @@ namespace AdvectionCalculationsGUI
 					pointsToDraw.Add(p);
 				}
 			}
-			//canvas.Refresh(); //TODO: draw
 			dataLoaded = true;
 			DrawData();	
 		}
 
+		/// <summary>
+		/// Draws the data into a bitmap. Bitmap is then used as a background on canvas
+		/// </summary>
 		private void DrawData()
 		{
-			completeBackground = new Bitmap(canvas_data.Width, canvas_data.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+			completeBackground = new Bitmap(canvas.Width, canvas.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 			Graphics background = Graphics.FromImage(completeBackground);
 			background.Clear(Color.White);
 			if (dataLoaded)
@@ -146,9 +166,11 @@ namespace AdvectionCalculationsGUI
 				}
 			}
 			background.Dispose();
-			canvas_data.BackgroundImage = completeBackground;
 		}
 
+		/// <summary>
+		/// Action Perfromed on "Select Folder" click. Opens folder selection dialog, unlocks "Start" button
+		/// </summary>
 		private void SelectFolder_Click(object sender, EventArgs e)
 		{
 			if (selectOutputFolderDialog.ShowDialog() == DialogResult.OK)
@@ -172,30 +194,39 @@ namespace AdvectionCalculationsGUI
 
 		private void Start_Click(object sender, EventArgs e)
 		{
-			backgroundWorker1.RunWorkerAsync();
-			
-			//Thread t = new Thread();
-			//t.Start(progressBar);
+			fieldNormilizerWorker.RunWorkerAsync();
 		}
 
+		
 
-
+		/// <summary>
+		/// Called when mouse has moved over the canvas. Updates
+		/// </summary>
 		private void Canvas_MouseMove(object sender, MouseEventArgs e)
 		{
-			canvas_data.Refresh(); //deletes everything
+			if (lastFrame != null)
+				lastFrame.Dispose();
+			lastFrame = newFrame;
+			newFrame = new Bitmap(canvas_holder.Width, canvas_holder.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+			Graphics frame = Graphics.FromImage(newFrame);
+			frame.DrawImageUnscaled(completeBackground,0,0);
 
 			Point last = null;
-			foreach (Point p in line)
+			foreach (List<Point> line in lines)
 			{
-				if (last != null)
+				last = null;
+				foreach (Point p in line)
 				{
-					int pX = (int)((float)(p.Pos.X * ratio + offX - dotPen.Width));
-					int pY = (int)((float)(p.Pos.Y * ratio + offY - dotPen.Width));
-					int lastX = (int)((float)(last.Pos.X * ratio + offX - dotPen.Width));
-					int lastY = (int)((float)(last.Pos.Y * ratio + offY - dotPen.Width));
-					graphics.DrawLine(linePen, lastX, lastY, pX, pY);
+					if (last != null)
+					{
+						int pX = (int)((float)(p.Pos.X * ratio + offX - dotPen.Width));
+						int pY = (int)((float)(p.Pos.Y * ratio + offY - dotPen.Width));
+						int lastX = (int)((float)(last.Pos.X * ratio + offX - dotPen.Width));
+						int lastY = (int)((float)(last.Pos.Y * ratio + offY - dotPen.Width));
+						frame.DrawLine(linePen, lastX, lastY, pX, pY);
+					}
+					last = p;
 				}
-				last = p;
 			}
 
 			int mX = e.X;
@@ -220,18 +251,32 @@ namespace AdvectionCalculationsGUI
 			{
 				int lastX = (int)((float)(last.Pos.X * ratio + offX - dotPen.Width));
 				int lastY = (int)((float)(last.Pos.Y * ratio + offY - dotPen.Width));
-				graphics.DrawLine(linePen, lastX, lastY, mX, mY);
+				frame.DrawLine(linePen, lastX, lastY, mX, mY);
 			}
 
-			graphics.DrawEllipse(new Pen(Color.Red, 10), mX - 5, mY - 5, 10, 10);
-
+			frame.DrawEllipse(new Pen(Color.Red, 10), mX - 5, mY - 5, 10, 10);
+			frame.Dispose();
+			Canvas_Refresh();
 		}
 
 		private void Canvas_Resize(object sender, EventArgs e)
 		{
 			DrawData();
-			graphics = canvas_data.CreateGraphics();
-			
+			if(lastFrame != null)
+				lastFrame.Dispose();
+			lastFrame = newFrame;
+			newFrame = new Bitmap(canvas_holder.Width, canvas_holder.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+			//Debug.WriteLine("New size of canvas " + canvas.Width + " by " + canvas.Height);
+			//Debug.WriteLine("New size of frame" + newFrame.Width + " by " + newFrame.Height);
+			Graphics frame = Graphics.FromImage(newFrame);
+			frame.DrawImageUnscaled(completeBackground, 0, 0);
+			frame.Dispose();
+			Canvas_Refresh();
+		}
+
+		private void Canvas_Refresh()
+		{
+			canvas.Image = newFrame;
 		}
 
 		private void CanvasKeyDown(object sender, KeyEventArgs e)
@@ -239,6 +284,10 @@ namespace AdvectionCalculationsGUI
 			if (e.KeyCode == Keys.Menu)
 			{
 				snap = true;
+			}
+			if(e.KeyCode == Keys.Enter)
+			{
+				lines.Add(new List<Point>());
 			}
 			e.Handled = true;
 		}
@@ -265,13 +314,13 @@ namespace AdvectionCalculationsGUI
 
 		private void Canvas_GetFocus(object sender, EventArgs e)
 		{
-			canvas_data.Focus();
+			canvas.Focus();
 		}
 
 		private void Canvas_MouseClick(object sender, MouseEventArgs e)
 		{
 			//Debug.WriteLine("Click in mouseClick");
-			
+			List<Point> line = lines[lines.Count - 1];
 			if (e.Button == MouseButtons.Left)
 			{
 				Point p = SnapPoint(e);
@@ -282,8 +331,17 @@ namespace AdvectionCalculationsGUI
 			}
 			if (e.Button == MouseButtons.Right)
 			{
-				if(line.Count > 0)
-					line.RemoveAt(line.Count-1);
+				if (line.Count > 0)
+				{
+					line.RemoveAt(line.Count - 1);
+				}
+				else
+				{
+					if(lines.Count > 1)
+					{
+						lines.RemoveAt(lines.Count - 1);
+					}
+				}
 			}
 		}
 
@@ -352,5 +410,7 @@ namespace AdvectionCalculationsGUI
 		{
 			this.progressBar.Value = e.ProgressPercentage;
 		}
+
+
 	}
 }

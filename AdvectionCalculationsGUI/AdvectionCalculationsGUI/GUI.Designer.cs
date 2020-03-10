@@ -34,7 +34,8 @@ namespace AdvectionCalculationsGUI
 		{
 			this.topLevelLayout = new System.Windows.Forms.TableLayoutPanel();
 			this.graphicsPanel = new System.Windows.Forms.TableLayoutPanel();
-			this.canvas_data = new System.Windows.Forms.Panel();
+			this.canvas_holder = new System.Windows.Forms.Panel();
+			this.canvas = new System.Windows.Forms.PictureBox();
 			this.startBtn = new System.Windows.Forms.Button();
 			this.settingsPanel = new System.Windows.Forms.Panel();
 			this.settingsTable = new System.Windows.Forms.TableLayoutPanel();
@@ -64,9 +65,11 @@ namespace AdvectionCalculationsGUI
 			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.selectDataDalog = new System.Windows.Forms.OpenFileDialog();
 			this.selectOutputFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
-			this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+			this.fieldNormilizerWorker = new System.ComponentModel.BackgroundWorker();
 			this.topLevelLayout.SuspendLayout();
 			this.graphicsPanel.SuspendLayout();
+			this.canvas_holder.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.canvas)).BeginInit();
 			this.settingsPanel.SuspendLayout();
 			this.settingsTable.SuspendLayout();
 			this.inputSettingsPanel.SuspendLayout();
@@ -100,7 +103,7 @@ namespace AdvectionCalculationsGUI
 			this.graphicsPanel.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
 			this.graphicsPanel.ColumnCount = 1;
 			this.graphicsPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.graphicsPanel.Controls.Add(this.canvas_data, 0, 0);
+			this.graphicsPanel.Controls.Add(this.canvas_holder, 0, 0);
 			this.graphicsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.graphicsPanel.Location = new System.Drawing.Point(344, 3);
 			this.graphicsPanel.Name = "graphicsPanel";
@@ -110,18 +113,29 @@ namespace AdvectionCalculationsGUI
 			this.graphicsPanel.Size = new System.Drawing.Size(1019, 583);
 			this.graphicsPanel.TabIndex = 1;
 			// 
-			// canvas_data
+			// canvas_holder
 			// 
-			this.canvas_data.Cursor = System.Windows.Forms.Cursors.Arrow;
-			this.canvas_data.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.canvas_data.Location = new System.Drawing.Point(4, 4);
-			this.canvas_data.Name = "canvas_data";
-			this.canvas_data.Size = new System.Drawing.Size(1011, 485);
-			this.canvas_data.TabIndex = 0;
-			this.canvas_data.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Canvas_MouseClick);
-			this.canvas_data.MouseEnter += new System.EventHandler(this.Canvas_GetFocus);
-			this.canvas_data.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Canvas_MouseMove);
-			this.canvas_data.Resize += new System.EventHandler(this.Canvas_Resize);
+			this.canvas_holder.Controls.Add(this.canvas);
+			this.canvas_holder.Cursor = System.Windows.Forms.Cursors.Arrow;
+			this.canvas_holder.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.canvas_holder.Location = new System.Drawing.Point(4, 4);
+			this.canvas_holder.Name = "canvas_holder";
+			this.canvas_holder.Size = new System.Drawing.Size(1011, 485);
+			this.canvas_holder.TabIndex = 0;
+			this.canvas_holder.Resize += new System.EventHandler(this.Canvas_Resize);
+			// 
+			// canvas
+			// 
+			this.canvas.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.canvas.Location = new System.Drawing.Point(0, 0);
+			this.canvas.Margin = new System.Windows.Forms.Padding(0);
+			this.canvas.Name = "canvas";
+			this.canvas.Size = new System.Drawing.Size(1011, 485);
+			this.canvas.TabIndex = 0;
+			this.canvas.TabStop = false;
+			this.canvas.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Canvas_MouseClick);
+			this.canvas.MouseEnter += new System.EventHandler(this.Canvas_GetFocus);
+			this.canvas.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Canvas_MouseMove);
 			// 
 			// startBtn
 			// 
@@ -472,10 +486,10 @@ namespace AdvectionCalculationsGUI
 			// 
 			this.selectDataDalog.FileName = "Dataset";
 			// 
-			// backgroundWorker1
+			// fieldNormilizerWorker
 			// 
-			this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
-			this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.ProgressChanged);
+			this.fieldNormilizerWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+			this.fieldNormilizerWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.ProgressChanged);
 			// 
 			// GUI
 			// 
@@ -489,6 +503,8 @@ namespace AdvectionCalculationsGUI
 			this.Load += new System.EventHandler(this.GUI_Load);
 			this.topLevelLayout.ResumeLayout(false);
 			this.graphicsPanel.ResumeLayout(false);
+			this.canvas_holder.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.canvas)).EndInit();
 			this.settingsPanel.ResumeLayout(false);
 			this.settingsTable.ResumeLayout(false);
 			this.inputSettingsPanel.ResumeLayout(false);
@@ -518,7 +534,7 @@ namespace AdvectionCalculationsGUI
 		private System.Windows.Forms.Button selectInputFileBtn;
 		private System.Windows.Forms.Button loadDataBtn;
 		private System.Windows.Forms.Button startBtn;
-		private System.Windows.Forms.Panel canvas_data;
+		private System.Windows.Forms.Panel canvas_holder;
 		private System.Windows.Forms.Label label_filename;
 		private System.Windows.Forms.Label label_avDistance;
 		private System.Windows.Forms.Label label_voxelSize;
@@ -539,7 +555,8 @@ namespace AdvectionCalculationsGUI
 		private System.Windows.Forms.TextBox steps;
 		private System.Windows.Forms.OpenFileDialog selectDataDalog;
 		private System.Windows.Forms.FolderBrowserDialog selectOutputFolderDialog;
-		private System.ComponentModel.BackgroundWorker backgroundWorker1;
+		private System.ComponentModel.BackgroundWorker fieldNormilizerWorker;
+		private PictureBox canvas;
 	}
 }
 
