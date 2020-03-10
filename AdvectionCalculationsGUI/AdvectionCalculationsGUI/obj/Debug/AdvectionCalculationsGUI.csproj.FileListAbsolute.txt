@@ -1,0 +1,17 @@
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\bin\Debug\AdvectionCalculationsGUI.exe.config
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\bin\Debug\AdvectionCalculationsGUI.exe
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\bin\Debug\AdvectionCalculationsGUI.pdb
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\obj\Debug\AdvectionCalculationsGUI.csprojAssemblyReference.cache
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\obj\Debug\AdvectionCalculationsGUI.GUI.resources
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\obj\Debug\AdvectionCalculationsGUI.Properties.Resources.resources
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\obj\Debug\AdvectionCalculationsGUI.csproj.GenerateResource.cache
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\obj\Debug\AdvectionCalculationsGUI.exe
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\obj\Debug\AdvectionCalculationsGUI.pdb
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\bin\Debug\Accord.dll.config
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\bin\Debug\Accord.dll
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\bin\Debug\Accord.Math.Core.dll
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\bin\Debug\Accord.Math.dll
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\bin\Debug\Accord.xml
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\bin\Debug\Accord.Math.xml
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\bin\Debug\Accord.Math.Core.xml
+D:\UnityWS\unity3d-master\AdvectionCalculationsGUI\AdvectionCalculationsGUI\obj\Debug\AdvectionCalculationsGUI.csproj.CopyComplete

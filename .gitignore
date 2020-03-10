@@ -4,3 +4,7 @@ LCS/Library/ShaderCache
 LCS/Temp
 LCS/.vs/LCS
 LCS/obj/Debug
+*.lock
+AdvectionCalculationsGUI/.vs
+AdvectionCalculationsGUI/bin
+AdvectionCalculationsGUI/obj

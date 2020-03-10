@@ -29,22 +29,38 @@ class Surface
 
 	public void UpdateTriangles(List<Triangle> triangles)
 	{
+		this.triangles = triangles.ToList();
+		//System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+		//sw.Start();
 		//this.triangles = this.triangles.Union(triangles).ToList();
+		//sw.Stop();
+		//Debug.Log("Union performed " + sw.ElapsedMilliseconds);
+
+		/*sw.Start();
+		int count = 0;
 		foreach(Triangle t in this.triangles.ToList())
 		{
-			if(!this.triangles.Contains(t))
+			if(!triangles.Contains(t))
 			{
 				this.triangles.Remove(t);
+				count++;
 			}
 		}
-
+		sw.Stop();
+		Debug.Log("Removed " + count + " Took " + sw.ElapsedMilliseconds);
+		sw.Restart();
+		count = 0;
 		foreach (Triangle t in triangles)
 		{
 			if (!this.triangles.Contains(t))
 			{
 				this.triangles.Add(t);
+				count++;
 			}
 		}
+		sw.Stop();
+
+		Debug.Log("And Added " + count + " Took " + sw.ElapsedMilliseconds);*/
 	}
 
 	public void Make()
@@ -91,6 +107,7 @@ class Surface
 			vertices[i] = seedVertices[i].pos;
 			colors[i] = Color.Lerp(Color.red, Color.blue, (float)((seedVertices[i].FTLE + 20.83) / 9.62));
 		}
+		Debug.Log("Mesh is calculated!");
 	}
 
 	public void ApplyChange()
@@ -102,6 +119,7 @@ class Surface
 		surface.name = "" + triangles.Count;
 		surface.GetComponent<MeshRenderer>().material = new Material(shader);
 		surface.GetComponent<MeshFilter>().mesh = mesh;
+		Debug.Log("Mesh updated!");
 	}
 
 	public GameObject GetSurface()

@@ -33,7 +33,7 @@ public class Triangulation : MonoBehaviour
 		surface = new Surface();
 		Surface.shader = shader;
 		triangles = new List<Triangle>();
-		f = new FTLEField("D:/UnityWS/AdvectionCalc/AdvectionCalc/bin/Debug/output/FTLEField.dat");
+		f = new FTLEField("D:/Users/yrmal/Desktop/output/FTLEField.dat");
 		seeds = new List<List<Seed>>();
 		Debug.Log(f.field.GetLength(0));
 		Debug.Log(f.field.GetLength(1));
@@ -71,20 +71,22 @@ public class Triangulation : MonoBehaviour
 
 	private void ReavalutateSurface()
 	{
-		triangles.Clear();
-		foreach (List<Seed> ls in seeds)
+		Debug.Log("Start preparation");
+		foreach(Triangle t in triangles.ToArray())
 		{
-			foreach (Seed s in ls)
+			if(!(t.A.FTLE >= levelMin && t.A.FTLE <= levelMax) || 
+			!(t.B.FTLE >= levelMin && t.B.FTLE <= levelMax) || 
+			!(t.C.FTLE >= levelMin && t.C.FTLE <= levelMax))
 			{
-				s.ResetUse();
+				triangles.Remove(t);
 			}
 		}
+		//triangles.Clear();
 
 		for (int i = 0; i < seeds.Count; i++)
 		{
 			for (int j = 0; j < seeds[0].Count; j++)
 			{
-				List<Triangle> created = new List<Triangle>(8);
 				Seed A = seeds[i][j];
 				if (A.FTLE >= levelMin && A.FTLE <= levelMax)
 				{
@@ -115,10 +117,12 @@ public class Triangulation : MonoBehaviour
 								//Debug.Log("[" + B.pos.ToString() + "]" +
 								//						"[" + C.pos.ToString() + "]");
 								//Debug.Log(A.IsInUse() + " " + B.IsInUse() + " " + C.IsInUse());
-								if (!A.IsInUse() || !B.IsInUse() || !C.IsInUse())
+								Triangle t = new Triangle(A, B, C);
+								if (!triangles.Contains(t))
 								{
-									Triangle t = new Triangle(A, B, C);
-									created.Add(t);
+									//created.Add(t);
+									t.Accept();
+									triangles.Add(t);
 								}
 							}
 							else
@@ -129,18 +133,15 @@ public class Triangulation : MonoBehaviour
 						C = B;
 						B = null;
 					}
-					foreach (Triangle t in created)
-					{
-						t.Accept();
-						triangles.Add(t);
-					}
-
 				}
 			}
+			if(i % 2 == 0)
+			{
+				Debug.Log(i / 2 + "%");
+			}
 		}
+		Debug.Log("Triangles are prepared");
 		surface.UpdateTriangles(triangles);
-		
-		Debug.Log("Done!");
 		surface.Make();
 		done = true;
 	}
