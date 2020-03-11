@@ -304,10 +304,10 @@ namespace AdvectionCalculationsGUI
 		private void ResetFields()
 		{
 			this.avDistance.Text = "0.01";
-			this.voxelSize.Text = "0.5";
-			this.resolution.Text = "666";
-			this.dt.Text = "666";
-			this.steps.Text = "100";
+			this.voxelSize.Text = "0.25";
+			this.resolution.Text = "0.05";
+			this.dt.Text = "0.15";
+			this.steps.Text = "200";
 			this.seconds.Text = "unused";
 			this.direction.SelectedIndex = 0;
 		}
@@ -381,13 +381,54 @@ namespace AdvectionCalculationsGUI
 
 		private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
 		{
-			Debug.WriteLine("Start doing work!");
+			List<Thread> threads;
+			ManualResetEvent notifier = new ManualResetEvent(false);
 			BackgroundWorker worker = sender as BackgroundWorker;
-			FTLEField field = new FTLEField(0.1, 2, 1, fds, selectOutputFolderDialog.SelectedPath);
-			List<Thread> threads = field.Start();
+
+			Debug.WriteLine("Start doing work!");
+			Advection adv = new Advection(ids, fds);
+			// get advection parameter
+
+			// start advection routine
+			//Thread t = new Thread(adv.Start);
+			//t.Start(new List<object> { radius, steps, dt, points, 50 }); //TODO
+			float radius = float.Parse(this.avDistance.Text)/2;
+			int steps = int.Parse(this.steps.Text);
+			double dt = double.Parse(this.dt.Text);
+			List<Point> entryPoints = new List<Point>();
+			//TODO
+			int segments = 20; //segments => points = segments - 1 + end_point
+			foreach (List<Point> line in lines)
+			{
+				Point last = null;
+				foreach(Point p in line)
+				{
+					if(last != null)
+					{
+						//interpolate a line
+						for(int i = 1; i < segments; i++)
+						{
+							float ratio = (float)i / segments;
+							Vector3 pos = new Vector3(
+								((p.Pos.X - last.Pos.X) * ratio) + last.Pos.X,
+								((p.Pos.Y - last.Pos.Y) * ratio) + last.Pos.Y,
+								((p.Pos.Z - last.Pos.Z) * ratio) + last.Pos.Z
+							);
+							//Debug.WriteLine("Trying to add " + pos + " between " + p.Pos + " and " + last.Pos);
+							entryPoints.Add(ids.GetPoint(pos));
+						}
+					}
+					entryPoints.Add(p);
+					last = p;
+				}
+			}
+			Debug.WriteLine("N-points: " + entryPoints.Count);
+			threads = adv.Start(radius, steps, dt, entryPoints, 40, selectOutputFolderDialog.SelectedPath, notifier);
+
+			// wait for it to finish & update progress bar somehow
+			//t.Join();
 			Debug.WriteLine("Threads are done, waiting for their end");
-			int max = threads.Count;
-			ManualResetEvent notifier = field.notifier;
+			int threadMax = threads.Count;
 			while (threads.Count > 0)
 			{
 				notifier.WaitOne(2000);
@@ -399,8 +440,32 @@ namespace AdvectionCalculationsGUI
 						threads.Remove(t);
 					}
 				}
-				worker.ReportProgress((max-threads.Count)*1000/max);
-				Debug.WriteLine("threads.Count " + threads.Count + " Max " + max + " Fraction " + (threads.Count * 1000 / max) + "/" + 1000);
+				worker.ReportProgress((threadMax - threads.Count) * 1000 / threadMax);
+				Debug.WriteLine("threads.Count " + threads.Count + " Max " + threadMax + 
+				" Fraction " + ((threadMax - threads.Count) * 1000 / threadMax) + "/" + 1000);
+			}
+
+			Debug.WriteLine("Start creating uniform FTLE field");
+
+			double resolution = double.Parse(this.resolution.Text); 
+			FTLEField field = new FTLEField(resolution, 2, 1, fds, selectOutputFolderDialog.SelectedPath);
+			threads = field.Start(notifier);
+			Debug.WriteLine("Threads are done, waiting for their end");
+			threadMax = threads.Count;
+			while (threads.Count > 0)
+			{
+				notifier.WaitOne(2000);
+				notifier.Reset();
+				foreach (Thread t in threads.ToList())
+				{
+					if (!t.IsAlive)
+					{
+						threads.Remove(t);
+					}
+				}
+				worker.ReportProgress((threadMax - threads.Count)*1000/ threadMax);
+				Debug.WriteLine("threads.Count " + threads.Count + " Max " + threadMax + 
+				" Fraction " + ((threadMax - threads.Count) * 1000 / threadMax) + "/" + 1000);
 			}
 			field.Serialize();
 			Debug.WriteLine("All done!");

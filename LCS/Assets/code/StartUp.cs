@@ -36,6 +36,7 @@ public class StartUp : MonoBehaviour
 	{
 		if(loaddata)
 		{
+		
 			ds = new DataSet(datafolder);
 			loaddata = false;
 		}

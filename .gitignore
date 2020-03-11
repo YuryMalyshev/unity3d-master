@@ -5,6 +5,10 @@ LCS/Temp
 LCS/.vs/LCS
 LCS/obj/Debug
 *.lock
-AdvectionCalculationsGUI/.vs
-AdvectionCalculationsGUI/bin
-AdvectionCalculationsGUI/obj
+AdvectionCalculationsGUI/.vs/*
+AdvectionCalculationsGUI/bin/*
+AdvectionCalculationsGUI/obj/*
+AdvectionCalculationsGUI/AdvectionCalculationsGUI/bin/Debug/AdvectionCalculationsGUI.exe
+*.exe
+AdvectionCalculationsGUI/AdvectionCalculationsGUI/bin/Debug/AdvectionCalculationsGUI.pdb
+*.pdb

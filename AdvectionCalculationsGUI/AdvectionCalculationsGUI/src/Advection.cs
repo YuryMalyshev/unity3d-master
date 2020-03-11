@@ -9,7 +9,7 @@ public class Advection
 {
 	public InputDataSet DS {get; private set;}
 	public FTLEDataSet FDS { get; private set; }
-	private double dt = 0.05;
+	//private double dt = 0.05;
 	private List<Seed> seeds;
 
 	public Advection(InputDataSet DS, FTLEDataSet FDS)
@@ -21,21 +21,25 @@ public class Advection
 	
 	private Semaphore semaphore;
 	private object fdslock = new object();
+	private ManualResetEvent notifier;
+	private string folder;
 
-	public void Start(object Radius_Steps_DT_EntryPoints_NThreads)
+	public List<Thread> Start(float radius, int steps, double dt, List<Point> entryPoints, int maxThreads, string folder, ManualResetEvent notifier)//object Radius_Steps_DT_EntryPoints_NThreads)
 	{
-		List<object> param = (List<object>)Radius_Steps_DT_EntryPoints_NThreads;
-		float radius = (float)param[0];
-		int steps = (int)param[1];
-		dt = (double)param[2];
-		List<Point> entryPoints = (List<Point>)param[3];
-		int threadCount = (int)param[4];
+		//List<object> param = (List<object>)Radius_Steps_DT_EntryPoints_NThreads;
+		//float radius = (float)param[0];
+		//int steps = (int)param[1];
+		//dt = (double)param[2];
+		//List<Point> entryPoints = (List<Point>)param[3];
+		//int maxThreads = (int)param[4];
+		this.folder = folder;
+		this.notifier = notifier;
 
-		List<Thread> threads = new List<Thread>(threadCount);
+		List<Thread> threads = new List<Thread>(maxThreads);
 
 		seeds = new List<Seed>();
 
-		semaphore = new Semaphore(threadCount, threadCount);
+		semaphore = new Semaphore(maxThreads, maxThreads);
 		Console.WriteLine("Total points: " + entryPoints.Count);
 
 		
@@ -48,12 +52,13 @@ public class Advection
 			threads.Add(t);
 		}
 
-		foreach(Thread t in threads)
+		/*foreach(Thread t in threads)
 		{
 			t.Join();
 		}
 
-		Console.WriteLine("All Done!");
+		Console.WriteLine("All Done!");*/
+		return threads;
 	}
 
 	private void CalculateSeed(object ID_Point_Steps_dt_radius)
@@ -69,7 +74,7 @@ public class Advection
 		int startstep = 0;
 		byte[] output = new byte[0];
 
-		if (File.Exists("./output/ID_" + ID + ".dat"))
+		if (File.Exists(folder + "/ID_" + ID + ".dat"))
 		{
 			int npoints = 5;
 			int nparam = 6;
@@ -77,7 +82,7 @@ public class Advection
 			int pointsSize = npoints * pointSize;
 			int lineSize = pointsSize + sizeof(double);
 
-			byte[] data = File.ReadAllBytes("./output/ID_" + ID + ".dat");
+			byte[] data = File.ReadAllBytes(folder + "/ID_" + ID + ".dat");
 
 			int lastStepStart = data.Length - lineSize;
 			startstep = data.Length / lineSize;
@@ -134,10 +139,11 @@ public class Advection
 		}
 
 		
-		using (FileStream fileStream = new FileStream("./output/ID_" + ID + ".dat", FileMode.Append))
+		using (FileStream fileStream = new FileStream(folder  + "/ID_" + ID + ".dat", FileMode.Append))
 		{
 			fileStream.Write(output, 0, output.Length);
 		}
 
+		notifier.Set();
 	}
 }

@@ -12,7 +12,7 @@ public class FTLEField
 	private double resolution;
 	List<Seed> seeds;
 	private object fieldlock = new object();
-	public ManualResetEvent notifier = new ManualResetEvent(false);
+	private ManualResetEvent notifier;
 	private string directory;
 
 	public FTLEField(double resolution, double dimX, double dimY, FTLEDataSet FDS, string directory)
@@ -24,8 +24,9 @@ public class FTLEField
 		Console.WriteLine("Seed count: " + seeds.Count);
 	}
 
-	public List<Thread> Start()
+	public List<Thread> Start(ManualResetEvent notifier)
 	{
+		this.notifier = notifier;
 		List<Thread> threads = new List<Thread>(field.Length);
 		for (int i = 0; i < field.GetLength(0); i++)
 		{
@@ -39,10 +40,6 @@ public class FTLEField
 			}
 		}
 		return threads;
-
-
-
-
 	}
 
 	private void CalculatePoint(object cell_pos_seeds)

@@ -13,10 +13,18 @@ public class DataSet
 		streamLines = new Dictionary<int, StreamLine>(filenames.Length);
 		foreach (string filename in filenames)
 		{
-			int start = filename.IndexOf("_") + 1;
-			int end = filename.IndexOf(".dat");
-			int ID = int.Parse(filename.Substring(start, end - start));
-			streamLines.Add(ID, new StreamLine("", filename));
+			try
+			{
+				int start = filename.IndexOf("_") + 1;
+				int end = filename.IndexOf(".dat");
+				
+				int ID = int.Parse(filename.Substring(start, end - start));
+				streamLines.Add(ID, new StreamLine("", filename));
+			}
+			catch
+			{
+				Debug.Log(filename + " is invalid!");
+			}
 		}
 	}
 
