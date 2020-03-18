@@ -25,7 +25,7 @@ namespace AdvectionCalculationsGUI
 		private Bitmap lastFrame;
 		private Bitmap newFrame;
 		private List<Point> pointsToDraw;
-		private List<List<Point>> lines = new List<List<Point>> ();
+		private List<List<Point>> lines = new List<List<Point>>();
 
 		double xMin = 0;
 		double xMax = 0;
@@ -116,27 +116,27 @@ namespace AdvectionCalculationsGUI
 			pointsToDraw.Clear();
 			foreach (Point p in points)
 			{
-				
+
 				double localMin = double.PositiveInfinity;
-				foreach(Point pd in pointsToDraw)
+				foreach (Point pd in pointsToDraw)
 				{
 					double dist = pd.DistanceTo(p);
-					if(localMin > dist)
+					if (localMin > dist)
 					{
 						localMin = dist;
 					}
-					if(dist < maxDist)
+					if (dist < maxDist)
 					{
 						break;
 					}
 				}
-				if(localMin > maxDist)
+				if (localMin > maxDist)
 				{
 					pointsToDraw.Add(p);
 				}
 			}
 			dataLoaded = true;
-			DrawData();	
+			DrawData();
 		}
 
 		/// <summary>
@@ -197,7 +197,7 @@ namespace AdvectionCalculationsGUI
 			fieldNormilizerWorker.RunWorkerAsync();
 		}
 
-		
+
 
 		/// <summary>
 		/// Called when mouse has moved over the canvas. Updates
@@ -209,7 +209,7 @@ namespace AdvectionCalculationsGUI
 			lastFrame = newFrame;
 			newFrame = new Bitmap(canvas_holder.Width, canvas_holder.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 			Graphics frame = Graphics.FromImage(newFrame);
-			frame.DrawImageUnscaled(completeBackground,0,0);
+			frame.DrawImageUnscaled(completeBackground, 0, 0);
 
 			Point last = null;
 			foreach (List<Point> line in lines)
@@ -262,7 +262,7 @@ namespace AdvectionCalculationsGUI
 		private void Canvas_Resize(object sender, EventArgs e)
 		{
 			DrawData();
-			if(lastFrame != null)
+			if (lastFrame != null)
 				lastFrame.Dispose();
 			lastFrame = newFrame;
 			newFrame = new Bitmap(canvas_holder.Width, canvas_holder.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -285,7 +285,7 @@ namespace AdvectionCalculationsGUI
 			{
 				snap = true;
 			}
-			if(e.KeyCode == Keys.Enter)
+			if (e.KeyCode == Keys.Enter)
 			{
 				lines.Add(new List<Point>());
 			}
@@ -306,9 +306,9 @@ namespace AdvectionCalculationsGUI
 			this.avDistance.Text = "0.01";
 			this.voxelSize.Text = "0.25";
 			this.resolution.Text = "0.05";
-			this.dt.Text = "0.15";
+			this.dt.Text = "0.1";
 			this.steps.Text = "200";
-			this.seconds.Text = "unused";
+			this.seconds.Text = "20";
 			this.direction.SelectedIndex = 0;
 		}
 
@@ -324,7 +324,7 @@ namespace AdvectionCalculationsGUI
 			if (e.Button == MouseButtons.Left)
 			{
 				Point p = SnapPoint(e);
-				if(p != null)
+				if (p != null)
 				{
 					line.Add(p);
 				}
@@ -337,7 +337,7 @@ namespace AdvectionCalculationsGUI
 				}
 				else
 				{
-					if(lines.Count > 1)
+					if (lines.Count > 1)
 					{
 						lines.RemoveAt(lines.Count - 1);
 					}
@@ -347,7 +347,7 @@ namespace AdvectionCalculationsGUI
 
 		private Point SnapPoint(MouseEventArgs e)
 		{
-			
+
 			int mX = e.X;
 			int mY = e.Y;
 			if (snap)
@@ -372,7 +372,7 @@ namespace AdvectionCalculationsGUI
 				);
 				return ids.GetPoint(pos);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				Debug.WriteLine(ex.StackTrace);
 				return null;
@@ -392,7 +392,7 @@ namespace AdvectionCalculationsGUI
 			// start advection routine
 			//Thread t = new Thread(adv.Start);
 			//t.Start(new List<object> { radius, steps, dt, points, 50 }); //TODO
-			float radius = float.Parse(this.avDistance.Text)/2;
+			float radius = float.Parse(this.avDistance.Text) / 2;
 			int steps = int.Parse(this.steps.Text);
 			double dt = double.Parse(this.dt.Text);
 			List<Point> entryPoints = new List<Point>();
@@ -401,12 +401,12 @@ namespace AdvectionCalculationsGUI
 			foreach (List<Point> line in lines)
 			{
 				Point last = null;
-				foreach(Point p in line)
+				foreach (Point p in line)
 				{
-					if(last != null)
+					if (last != null)
 					{
 						//interpolate a line
-						for(int i = 1; i < segments; i++)
+						for (int i = 1; i < segments; i++)
 						{
 							float ratio = (float)i / segments;
 							Vector3 pos = new Vector3(
@@ -441,13 +441,13 @@ namespace AdvectionCalculationsGUI
 					}
 				}
 				worker.ReportProgress((threadMax - threads.Count) * 1000 / threadMax);
-				Debug.WriteLine("threads.Count " + threads.Count + " Max " + threadMax + 
+				Debug.WriteLine("threads.Count " + threads.Count + " Max " + threadMax +
 				" Fraction " + ((threadMax - threads.Count) * 1000 / threadMax) + "/" + 1000);
 			}
 
 			Debug.WriteLine("Start creating uniform FTLE field");
 
-			double resolution = double.Parse(this.resolution.Text); 
+			double resolution = double.Parse(this.resolution.Text);
 			FTLEField field = new FTLEField(resolution, 2, 1, fds, selectOutputFolderDialog.SelectedPath);
 			threads = field.Start(notifier);
 			Debug.WriteLine("Threads are done, waiting for their end");
@@ -463,8 +463,8 @@ namespace AdvectionCalculationsGUI
 						threads.Remove(t);
 					}
 				}
-				worker.ReportProgress((threadMax - threads.Count)*1000/ threadMax);
-				Debug.WriteLine("threads.Count " + threads.Count + " Max " + threadMax + 
+				worker.ReportProgress((threadMax - threads.Count) * 1000 / threadMax);
+				Debug.WriteLine("threads.Count " + threads.Count + " Max " + threadMax +
 				" Fraction " + ((threadMax - threads.Count) * 1000 / threadMax) + "/" + 1000);
 			}
 			field.Serialize();
@@ -476,6 +476,102 @@ namespace AdvectionCalculationsGUI
 			this.progressBar.Value = e.ProgressPercentage;
 		}
 
+		private void GenericTextBoxKeyPress(object sender, KeyPressEventArgs e)
+		{
+			if(!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar) && e.KeyChar != '.')
+			{
+				// NOK
+				e.Handled = true;
+			}
 
+			// only allow one decimal point
+			if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+			{
+				// NOK
+				e.Handled = true;
+			}
+		}
+
+		private void IntegerTextBoxKeyPress(object sender, KeyPressEventArgs e)
+		{
+			GenericTextBoxKeyPress(sender, e);
+			if(e.KeyChar == '.')
+			{
+				// actually, NOK
+				e.Handled = true;
+			}
+		}
+
+		private void GenericTextChange(object sender, EventArgs e)
+		{
+			Debug.WriteLine(sender);
+			System.Windows.Forms.TextBox tb = (System.Windows.Forms.TextBox)sender;
+			if (tb.Text.Length == 0)
+			{
+				tb.BackColor = Color.PaleVioletRed;
+			}
+			else
+			{
+				if(double.TryParse(tb.Text, out double result))
+				{
+					if(result != 0)
+						tb.BackColor = System.Drawing.SystemColors.Window;
+					else
+						tb.BackColor = Color.PaleVioletRed;
+				}
+				else
+				{
+					tb.Text = "1";
+				}
+			}
+		}
+
+		private void StepsParamsTextChange(object sender, EventArgs e)
+		{
+			GenericTextChange(sender, e);
+			//double dt = double.Parse(this.dt.Text);
+			if(!double.TryParse(this.dt.Text, out double dt))
+			{
+				dt = 1;
+			}
+			if (!double.TryParse(this.seconds.Text, out double seconds))
+			{
+				seconds = 1;
+			}
+			if (!int.TryParse(this.steps.Text, out int steps))
+			{
+				if(this.steps.Text.Length > 0)
+				{
+					this.steps.Text = "1";
+				}
+				steps = 1;
+			}
+			if(sender.Equals(this.dt))
+			{
+				this.seconds.Text = "" + steps * dt;
+			}
+			else if(sender.Equals(this.seconds))
+			{
+				this.steps.Text = "" + (int)(Math.Ceiling(seconds / dt));
+			}
+			else if(sender.Equals(this.steps))
+			{
+				this.seconds.Text = "" + steps * dt;
+			}
+		}
+
+		private void SecondsTextChange(object sender, EventArgs e)
+		{
+			Debug.WriteLine(",");
+		}
+
+		private void GenericTextBoxLeave(object sender, EventArgs e)
+		{
+			System.Windows.Forms.TextBox tb = (System.Windows.Forms.TextBox)sender;
+			if (tb.TextLength == 0)
+			{
+				tb.Text = "1";
+			}
+		}
 	}
 }

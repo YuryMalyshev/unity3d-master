@@ -289,6 +289,9 @@ namespace AdvectionCalculationsGUI
 			this.avDistance.Name = "avDistance";
 			this.avDistance.Size = new System.Drawing.Size(100, 22);
 			this.avDistance.TabIndex = 7;
+			this.avDistance.TextChanged += new System.EventHandler(this.GenericTextChange);
+			this.avDistance.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.GenericTextBoxKeyPress);
+			this.avDistance.Leave += new System.EventHandler(this.GenericTextBoxLeave);
 			// 
 			// voxelSize
 			// 
@@ -297,6 +300,9 @@ namespace AdvectionCalculationsGUI
 			this.voxelSize.Name = "voxelSize";
 			this.voxelSize.Size = new System.Drawing.Size(100, 22);
 			this.voxelSize.TabIndex = 8;
+			this.voxelSize.TextChanged += new System.EventHandler(this.GenericTextChange);
+			this.voxelSize.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.GenericTextBoxKeyPress);
+			this.voxelSize.Leave += new System.EventHandler(this.GenericTextBoxLeave);
 			// 
 			// outputSettingsPanel
 			// 
@@ -452,6 +458,9 @@ namespace AdvectionCalculationsGUI
 			this.resolution.Name = "resolution";
 			this.resolution.Size = new System.Drawing.Size(100, 22);
 			this.resolution.TabIndex = 13;
+			this.resolution.TextChanged += new System.EventHandler(this.GenericTextChange);
+			this.resolution.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.GenericTextBoxKeyPress);
+			this.resolution.Leave += new System.EventHandler(this.GenericTextBoxLeave);
 			// 
 			// dt
 			// 
@@ -459,6 +468,9 @@ namespace AdvectionCalculationsGUI
 			this.dt.Name = "dt";
 			this.dt.Size = new System.Drawing.Size(100, 22);
 			this.dt.TabIndex = 14;
+			this.dt.TextChanged += new System.EventHandler(this.StepsParamsTextChange);
+			this.dt.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.GenericTextBoxKeyPress);
+			this.dt.Leave += new System.EventHandler(this.GenericTextBoxLeave);
 			// 
 			// seconds
 			// 
@@ -466,6 +478,9 @@ namespace AdvectionCalculationsGUI
 			this.seconds.Name = "seconds";
 			this.seconds.Size = new System.Drawing.Size(100, 22);
 			this.seconds.TabIndex = 15;
+			this.seconds.TextChanged += new System.EventHandler(this.StepsParamsTextChange);
+			this.seconds.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.GenericTextBoxKeyPress);
+			this.seconds.Leave += new System.EventHandler(this.GenericTextBoxLeave);
 			// 
 			// steps
 			// 
@@ -473,6 +488,9 @@ namespace AdvectionCalculationsGUI
 			this.steps.Name = "steps";
 			this.steps.Size = new System.Drawing.Size(100, 22);
 			this.steps.TabIndex = 16;
+			this.steps.TextChanged += new System.EventHandler(this.StepsParamsTextChange);
+			this.steps.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IntegerTextBoxKeyPress);
+			this.steps.Leave += new System.EventHandler(this.GenericTextBoxLeave);
 			// 
 			// progressBar
 			// 

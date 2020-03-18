@@ -102,10 +102,20 @@ class Surface
 
 		vertices = new Vector3[seedVertices.Count];
 		colors = new Color[seedVertices.Count];
+		double offset = 20.8368614175521;
+		double range = 8.6188302426474;
 		for (int i = 0; i < seedVertices.Count; i++)
 		{
 			vertices[i] = seedVertices[i].pos;
-			colors[i] = Color.Lerp(Color.red, Color.blue, (float)((seedVertices[i].FTLE + 20.83) / 9.62));
+			float num = (float)((seedVertices[i].FTLE + offset) / range);
+			if (num > 0.5)
+			{
+				colors[i] = Color.Lerp(Color.green, Color.red, (num-0.5f)*2);
+			}
+			else
+			{
+				colors[i] = Color.Lerp(Color.blue, Color.green, num * 2);
+			}
 		}
 		Debug.Log("Mesh is calculated!");
 	}

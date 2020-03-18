@@ -1,9 +1,11 @@
 ﻿using Assets.code;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using UnityEditor;
 using UnityEngine;
 
 public class Triangulation : MonoBehaviour
@@ -23,10 +25,15 @@ public class Triangulation : MonoBehaviour
 	{1 , 1 },
 	{0 , 1 }};
 	// Start is called before the first frame update
-	public double levelMin = 0;
-	public double levelMax = 0;
-	public bool redraw = false;
-	private bool done = false;
+	private double AbsLevelMin = double.PositiveInfinity;
+	private double AbsLevelMax = double.NegativeInfinity;
+	private double levelRange;
+	public bool newtask = false;
+	private enum DrawStatus
+	{
+		waiting, processing, ready
+	}
+	private DrawStatus status;
 	FTLEField f;
 	void Start()
 	{
@@ -45,32 +52,58 @@ public class Triangulation : MonoBehaviour
 				Seed s = new Seed(new double[] { i*0.01, j*0.01, 0 });
 				s.FTLE = f.field[i, j];
 				seeds[i].Add(s);
+				if(s.FTLE < AbsLevelMin)
+				{
+					AbsLevelMin = s.FTLE;
+				}
+				if(s.FTLE > AbsLevelMax)
+				{
+					AbsLevelMax = s.FTLE;
+				}
 			}
 		}
+		levelRange = AbsLevelMax - AbsLevelMin;
 		Debug.Log(seeds.Count);
 		Debug.Log(seeds[0].Count);
 		
 	}
 
+	private Tuple<Thread, object> task_param;
 	// Update is called once per frame
 	void Update()
 	{
-		if (redraw)
+		/*if (redraw)
 		{
 			Thread thread = new Thread(ReavalutateSurface);
 			thread.Start();
 			redraw = false;
+		}*/
+		if(status == DrawStatus.waiting)
+		{
+			// Do nothing
+			if(newtask)
+			{
+				task_param.Item1.Start(task_param.Item2);
+				status = DrawStatus.processing;
+				newtask = false;
+			}
 		}
-
-		if (done)
+		else if(status == DrawStatus.processing)
+		{
+			// Do nothing
+		}
+		else if(status == DrawStatus.ready)
 		{
 			surface.ApplyChange();
-			done = false;
+			status = DrawStatus.waiting;
 		}
-	}
+	}	
 
-	private void ReavalutateSurface()
+	private void ReavalutateSurface(object tuple_min_max)
 	{
+		Tuple<double, double> min_max = (Tuple<double, double>)tuple_min_max;
+		double levelMin = min_max.Item1;
+		double levelMax = min_max.Item2;
 		Debug.Log("Start preparation");
 		foreach(Triangle t in triangles.ToArray())
 		{
@@ -143,7 +176,44 @@ public class Triangulation : MonoBehaviour
 		Debug.Log("Triangles are prepared");
 		surface.UpdateTriangles(triangles);
 		surface.Make();
-		done = true;
+		status = DrawStatus.ready;
+	}
+
+	private float layerFraction = 0.5f;
+	private float widthFraction = 1;
+	private bool auto = false;
+
+	public void LayerUpdate(float layer)
+	{
+		layerFraction = layer;
+		if(auto)
+		{
+			ReDraw();
+		}
+	}
+
+	public void WidthUpdate(float width)
+	{
+		widthFraction = width;
+		if(auto)
+		{
+			ReDraw();
+		}
+	}
+
+	public void AutoUpdate(bool auto)
+	{
+		this.auto = auto;
+	}
+
+	public void ReDraw()
+	{
+		double median = layerFraction * levelRange + AbsLevelMin;
+		double width = widthFraction * levelRange;
+		double levelMin = median - width;
+		double levelMax = median + width;
+		task_param = new Tuple<Thread, object>(new Thread(ReavalutateSurface), new Tuple<double, double>(levelMin, levelMax));
+		newtask = true;
 	}
 
 }
