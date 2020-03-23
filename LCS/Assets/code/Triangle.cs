@@ -9,14 +9,14 @@ namespace Assets.code
 {
 	class Triangle : IEquatable<Triangle>
 	{
-		public Seed A { get; private set; }
-		public Seed B { get; private set; }
-		public Seed C { get; private set; }
+		public Seed_DEPRECATED A { get; private set; }
+		public Seed_DEPRECATED B { get; private set; }
+		public Seed_DEPRECATED C { get; private set; }
 
-		public List<Seed> Points { get => new List<Seed>() { A, B, C }; }
+		public List<Seed_DEPRECATED> Points { get => new List<Seed_DEPRECATED>() { A, B, C }; }
 		//private GameObject triangle;
 
-		public Triangle(Seed A, Seed B, Seed C)
+		public Triangle(Seed_DEPRECATED A, Seed_DEPRECATED B, Seed_DEPRECATED C)
 		{
 			//Debug.Log("Creted new triangle [" + A.pos.x + ", " + A.pos.y + "] " +
 			//										"[" + B.pos.x + ", " + B.pos.y + "] " +
@@ -54,8 +54,8 @@ namespace Assets.code
 
 		private static bool ScrambledEquals(Triangle one, Triangle other)
 		{
-			Dictionary<Seed,  int> cnt = new Dictionary<Seed, int>();
-			foreach (Seed s in one.Points)
+			Dictionary<Seed_DEPRECATED,  int> cnt = new Dictionary<Seed_DEPRECATED, int>();
+			foreach (Seed_DEPRECATED s in one.Points)
 			{
 				if (cnt.ContainsKey(s))
 				{
@@ -66,7 +66,7 @@ namespace Assets.code
 					cnt.Add(s, 1);
 				}
 			}
-			foreach (Seed s in other.Points)
+			foreach (Seed_DEPRECATED s in other.Points)
 			{
 				if (cnt.ContainsKey(s))
 				{

@@ -1,131 +1,125 @@
-﻿using Accord.Math;
-using Accord.Math.Decompositions;
+﻿using Accord.Math.Decompositions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Numerics;
 
-public class Seed
+namespace AdvectionCalculationsGUI.src
 {
-	private List<Point> points = new List<Point>();
-	private readonly double radius;
-	public double FTLE { get; set; }
-	public int Step { get; }
-	public Seed(Point center, float radius, InputDataSet ds)
+	public class Seed
 	{
-		this.radius = radius;
-		FTLE = double.NegativeInfinity;
-		points.Add(center.Clone());
-		points.Add(ds.GetPoint(new System.Numerics.Vector3( center.Pos.X, center.Pos.Y + radius, center.Pos.Z ))); //UP
-		points.Add(ds.GetPoint(new System.Numerics.Vector3(center.Pos.X, center.Pos.Y - radius, center.Pos.Z ))); //DOWN
-		points.Add(ds.GetPoint(new System.Numerics.Vector3( center.Pos.X - radius, center.Pos.Y, center.Pos.Z ))); //LEFT
-		points.Add(ds.GetPoint(new System.Numerics.Vector3(center.Pos.X + radius, center.Pos.Y, center.Pos.Z ))); //RIGHT
-	}
-
-	public Seed(List<Point> points, double radius)
-	{
-		this.radius = radius;
-		this.points = points;
-	}
-
-	public List<Point> getPoints()
-	{
-		return points;
-	}
-
-	public System.Numerics.Vector3 getCurPos()
-	{
-		return points[0].Pos;
-	}
-
-	public double Calculate(InputDataSet ds, double dt)
-	{
-		for (int i = 0; i < points.Count; i++)
+		private enum Direction
 		{
-			if (points[i] != null)
+			North, South, East, West, Up, Down
+		}
+		private Point center;
+		private readonly Dictionary<Direction, Point> pseudoparticles;
+		private readonly double radius;
+		private double FTLE;
+		private readonly InputDataSet ids;
+		public Seed(Point center, float radius, InputDataSet ids)
+		{
+			this.radius = radius;
+			FTLE = double.NegativeInfinity;
+			this.center = center;
+			this.ids = ids;
+			pseudoparticles = new Dictionary<Direction, Point>(6)
 			{
-				System.Numerics.Vector3 newPos = new System.Numerics.Vector3();
-				newPos.X = points[i].Pos.X + points[i].Vel.Y * (float)dt;
-				newPos.Y = points[i].Pos.Y + points[i].Vel.X * (float)dt;
-				newPos.Z = points[i].Pos.Z + points[i].Vel.Z * (float)dt;
-				try
+				{ Direction.North, ids.GetPoint(new System.Numerics.Vector3(center.Pos.X, center.Pos.Y + radius, center.Pos.Z)) },
+				{ Direction.South, ids.GetPoint(new System.Numerics.Vector3(center.Pos.X, center.Pos.Y - radius, center.Pos.Z)) },
+				{ Direction.West,  ids.GetPoint(new System.Numerics.Vector3(center.Pos.X - radius, center.Pos.Y, center.Pos.Z)) },
+				{ Direction.East,  ids.GetPoint(new System.Numerics.Vector3(center.Pos.X + radius, center.Pos.Y, center.Pos.Z)) },
+				{ Direction.Up,    ids.GetPoint(new System.Numerics.Vector3(center.Pos.X, center.Pos.Y, center.Pos.Z + radius)) },
+				{ Direction.Down,  ids.GetPoint(new System.Numerics.Vector3(center.Pos.X, center.Pos.Y, center.Pos.Z - radius)) }
+			};
+		}
+
+
+		public void Calculate(float dt)
+		{
+			if (center == null)
+				return;
+			Vector3 newPos = GetNewPos(center, dt);
+			try
+			{
+				center = Interpolator<Point>.NNInterpolatePoint(newPos, ids.GetPoints());
+			}
+			catch
+			{
+				center = null;
+				return;
+			}
+
+			Direction[] keys = new Direction[pseudoparticles.Count];
+			pseudoparticles.Keys.CopyTo(keys, 0);
+			foreach (Direction d in keys)
+			{
+				if (pseudoparticles[d] != null)
 				{
-					points[i] = Interpolator.InterpolatePoint(newPos, ds.GetPoints(), ds.voxelSize);
-				}
-				catch (Exception)
-				{
-					points[i] = null;
+					newPos = GetNewPos(pseudoparticles[d], dt);
+					try
+					{
+						pseudoparticles[d] = Interpolator<Point>.NNInterpolatePoint(newPos, ids.GetPoints());
+					}
+					catch
+					{
+						pseudoparticles[d] = null;
+					}
 				}
 			}
-			if(points[i] == null)
+			
+			double A, B, C, D, E, F;
+			if (pseudoparticles[Direction.North] == null || pseudoparticles[Direction.South] == null)
 			{
-				//Console.WriteLine("[WARNING] point " + i + " in null");
-			}
-		}
-		double A, B, C, D;
-		if (points[1] == null || points[2] == null)
-		{
-			B = 0;
-			D = 0;
-		}
-		else
-		{
-			B = (points[1].Pos.X - points[2].Pos.X) / 2 * radius;
-			D = (points[1].Pos.Y - points[2].Pos.Y) / 2 * radius;
-		}
-		if (points[3] == null || points[4] == null)
-		{
-			A = 0;
-			C = 0;
-		}
-		else
-		{
-			A = (points[4].Pos.X - points[3].Pos.X) / 2 * radius;
-			C = (points[4].Pos.Y - points[3].Pos.Y) / 2 * radius;
-		}
-
-		double[,] phi = new double[2,2]{ { A, B }, { C, D } };
-
-		double[,] phiT = Matrix.Transpose(phi);
-		double[,] phiTphi = Matrix.Dot(phiT, phi);
-		EigenvalueDecomposition eig = new EigenvalueDecomposition(phiTphi, true, true);
-		double[] eigh = eig.RealEigenvalues;
-		return Matrix.Max(eigh);
-	}
-	
-	public byte[] Serialize()
-	{
-		byte[] temp = new byte[0];
-		foreach (Point p in points)
-		{
-			if (p == null)
-			{
-				for (int i = 0; i < 6; i++)
-				{
-					temp = temp.Concat(BitConverter.GetBytes(0)).ToArray();
-				}
+				B = 0;
+				D = 0;
 			}
 			else
 			{
-				temp = temp.Concat(BitConverter.GetBytes(p.Pos.X)).ToArray();
-				temp = temp.Concat(BitConverter.GetBytes(p.Pos.Y)).ToArray();
-				temp = temp.Concat(BitConverter.GetBytes(p.Pos.Z)).ToArray();
-				temp = temp.Concat(BitConverter.GetBytes(p.Vel.X)).ToArray();
-				temp = temp.Concat(BitConverter.GetBytes(p.Vel.Y)).ToArray();
-				temp = temp.Concat(BitConverter.GetBytes(p.Vel.Z)).ToArray();
+				B = (pseudoparticles[Direction.North].Pos.X - pseudoparticles[Direction.South].Pos.X) / 2 * radius;
+				D = (pseudoparticles[Direction.North].Pos.Y - pseudoparticles[Direction.South].Pos.Y) / 2 * radius;
+			}
+			if (pseudoparticles[Direction.West] == null || pseudoparticles[Direction.East] == null)
+			{
+				A = 0;
+				C = 0;
+			}
+			else
+			{
+				A = (pseudoparticles[Direction.East].Pos.X - pseudoparticles[Direction.West].Pos.X) / 2 * radius;
+				C = (pseudoparticles[Direction.East].Pos.Y - pseudoparticles[Direction.West].Pos.Y) / 2 * radius;
+			}
+			if (pseudoparticles[Direction.Up] == null || pseudoparticles[Direction.Down] == null)
+			{
+				E = 0;
+				F = 0;
+			}
+			else
+			{
+				E = (pseudoparticles[Direction.Up].Pos.X - pseudoparticles[Direction.Down].Pos.X) / 2 * radius;
+				F = (pseudoparticles[Direction.Up].Pos.Y - pseudoparticles[Direction.Down].Pos.Y) / 2 * radius;
+			}
+
+			double[,] phi = new double[2, 2] { { A, B }, { C, D } };
+
+			double[,] phiT = Accord.Math.Matrix.Transpose(phi);
+			double[,] phiTphi = Accord.Math.Matrix.Dot(phiT, phi);
+			EigenvalueDecomposition eig = new EigenvalueDecomposition(phiTphi, true, true);
+			double[] eigh = eig.RealEigenvalues;
+			FTLE = Math.Log(Accord.Math.Matrix.Max(eigh));
+			if(double.IsInfinity(FTLE))
+			{
+				FTLE = 0;
 			}
 		}
-		return temp;
-	}
 
-	public Seed Clone()
-	{
-		List<Point> temp = new List<Point>(points.Count);
-		foreach(Point p in points)
+		public SeedPoint Simplify()
 		{
-			temp.Add(p.Clone());
+			return new SeedPoint(center, FTLE);
 		}
-		Seed s = new Seed(temp, radius);
-		s.FTLE = FTLE;
-		return s;
+
+		private Vector3 GetNewPos(Point p, float dt)
+		{
+			return new Vector3(p.Pos.X + p.Vel.Y * dt, p.Pos.Y + p.Vel.X * dt, p.Pos.Z + p.Vel.Z * dt);
+		}
 	}
 }

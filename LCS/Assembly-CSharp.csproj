@@ -63,14 +63,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\code\DataSet.cs" />
-    <Compile Include="Assets\code\FTLEField.cs" />
-    <Compile Include="Assets\code\Interpolator.cs" />
-    <Compile Include="Assets\code\Painter.cs" />
-    <Compile Include="Assets\code\Point.cs" />
-    <Compile Include="Assets\code\Seed.cs" />
-    <Compile Include="Assets\code\StartUp.cs" />
-    <Compile Include="Assets\code\StreamLine.cs" />
+    <Compile Include="Assets\code\DataSet_DEPRECATED.cs" />
+    <Compile Include="Assets\code\FTLEField_DEPRECATED.cs" />
+    <Compile Include="Assets\code\Interpolator_DEPRECATED.cs" />
+    <Compile Include="Assets\code\Painter_DEPRECATED.cs" />
+    <Compile Include="Assets\code\Point_DEPRECATED.cs" />
+    <Compile Include="Assets\code\Seed_DEPRECATED.cs" />
+    <Compile Include="Assets\code\StartUp_DEPRECATED.cs" />
+    <Compile Include="Assets\code\StreamLine_DEPRECATED.cs" />
     <Compile Include="Assets\code\Surface.cs" />
     <Compile Include="Assets\code\Triangle.cs" />
     <Compile Include="Assets\code\Triangulation.cs" />

@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// Painter class is used to 
 /// </summary>
-public class Painter : MonoBehaviour
+public class Painter_DEPRECATED : MonoBehaviour
 {
 	public GameObject PointPrefab;
 	private ConcurrentQueue<List<object>> toBeUpdated;

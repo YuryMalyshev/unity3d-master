@@ -3,14 +3,14 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-public class DataSet
+public class DataSet_DEPRECATED
 {
-	private Dictionary<int, StreamLine> streamLines;
-	public DataSet(string filedir)
+	private Dictionary<int, StreamLine_DEPRECATED> streamLines;
+	public DataSet_DEPRECATED(string filedir)
 	{
 		Debug.Log(filedir);
 		string[] filenames = Directory.GetFiles(filedir, "*.dat");
-		streamLines = new Dictionary<int, StreamLine>(filenames.Length);
+		streamLines = new Dictionary<int, StreamLine_DEPRECATED>(filenames.Length);
 		foreach (string filename in filenames)
 		{
 			try
@@ -19,7 +19,7 @@ public class DataSet
 				int end = filename.IndexOf(".dat");
 				
 				int ID = int.Parse(filename.Substring(start, end - start));
-				streamLines.Add(ID, new StreamLine("", filename));
+				streamLines.Add(ID, new StreamLine_DEPRECATED("", filename));
 			}
 			catch
 			{
@@ -28,17 +28,17 @@ public class DataSet
 		}
 	}
 
-	public List<Seed> GetPoints()
+	public List<Seed_DEPRECATED> GetPoints()
 	{
-		List<Seed> points = new List<Seed>();
-		foreach(StreamLine sl in streamLines.Values)
+		List<Seed_DEPRECATED> points = new List<Seed_DEPRECATED>();
+		foreach(StreamLine_DEPRECATED sl in streamLines.Values)
 		{
 			points.AddRange(sl.GetPoints());
 		}
 		return points;
 	}
 
-	public List<Seed> GetLine(int ID)
+	public List<Seed_DEPRECATED> GetLine(int ID)
 	{
 		try
 		{
@@ -46,7 +46,7 @@ public class DataSet
 		}
 		catch
 		{
-			return new List<Seed>();
+			return new List<Seed_DEPRECATED>();
 		}
 	}
 }

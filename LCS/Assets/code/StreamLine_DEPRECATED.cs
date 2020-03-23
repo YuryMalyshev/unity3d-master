@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-class StreamLine
+class StreamLine_DEPRECATED
 {
-	private List<Seed> points;
+	private List<Seed_DEPRECATED> points;
 
-	public StreamLine(string filedir, string filename)
+	public StreamLine_DEPRECATED(string filedir, string filename)
 	{
 		// read data
 		byte[] bytes = File.ReadAllBytes(filedir + filename);
@@ -21,14 +21,14 @@ class StreamLine
 		int pointsSize = npoints * pointSize;
 		int lineSize = pointsSize + sizeof(double);
 
-		points = new List<Seed>(bytes.Length / lineSize);
+		points = new List<Seed_DEPRECATED>(bytes.Length / lineSize);
 		double maxFTLE = double.NegativeInfinity;
 		for (int i = 0; i < bytes.Length; i += lineSize)
 		{
 			try
 			{
 				int step = i / lineSize;
-				List<Point> temp_points = new List<Point>(npoints);
+				List<Point_DEPRECATED> temp_points = new List<Point_DEPRECATED>(npoints);
 				for (int j = i; j < i + pointsSize; j += pointSize)
 				{
 					double[] pos = new double[nparam / 2];
@@ -38,25 +38,25 @@ class StreamLine
 						pos[k] = BitConverter.ToDouble(bytes, j + sizeof(double) * k);
 						vel[k] = BitConverter.ToDouble(bytes, j + sizeof(double) * (k + nparam / 2));
 					}
-					temp_points.Add(new Point(pos, vel));
+					temp_points.Add(new Point_DEPRECATED(pos, vel));
 				}
 				double FTLE = BitConverter.ToDouble(bytes, i + pointsSize);
 				maxFTLE = Math.Max(maxFTLE, FTLE);
-				points.Add(new Seed(temp_points, step));
+				points.Add(new Seed_DEPRECATED(temp_points, step));
 			}
 			catch
 			{
 				Debug.LogError("Error in " + filename);
 			}
 		}
-		foreach(Seed s in points)
+		foreach(Seed_DEPRECATED s in points)
 		{
 			s.FTLE = maxFTLE;
 		}
 		//Debug.Log("MaxFTLE = " + maxFTLE);
 	}
 
-	public List<Seed> GetPoints()
+	public List<Seed_DEPRECATED> GetPoints()
 	{
 		return points;
 	}

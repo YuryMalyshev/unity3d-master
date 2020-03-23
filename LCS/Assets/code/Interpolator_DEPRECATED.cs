@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class Interpolator
+public static class Interpolator_DEPRECATED
 {
-	public static double Interpolate(double[] pos, List<Seed> dataset, double radius)
+	public static double Interpolate(double[] pos, List<Seed_DEPRECATED> dataset, double radius)
 	{
 		double inverseDistSum = 0;
 		int power = 3;
@@ -16,7 +16,7 @@ public static class Interpolator
 		double test1 = pos[2];
 		double test2 = dataset[0].pos[2];
 
-		foreach(Seed s in dataset)
+		foreach(Seed_DEPRECATED s in dataset)
 		{
 			double d = Math.Sqrt(Math.Pow(pos[0] - s.pos[0], 2) + Math.Pow(pos[1] - s.pos[1], 2) + Math.Pow(pos[2] - s.pos[2], 2));
 			if (d == 0)

@@ -1,89 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-public class StreamLine
+namespace AdvectionCalculationsGUI.src
 {
-	private List<Seed> points;
-
-	public StreamLine(string filedir, string filename)
+	public class StreamLine
 	{
-		// read data
-		byte[] bytes = File.ReadAllBytes(filedir + filename);
-		//Debug.Log(filename + " : " + bytes.Length + " bytes");
-
-		// add seeds
-
-		int npoints = 5;
-		int nparam = 6;
-		int pointSize = nparam * sizeof(double);
-		int pointsSize = npoints * pointSize;
-		int lineSize = pointsSize + sizeof(double);
-
-		points = new List<Seed>(bytes.Length / lineSize);
-		double maxFTLE = double.NegativeInfinity;
-		for (int i = 0; i < bytes.Length; i += lineSize)
+		private static int IDCount = 0;
+		public readonly int ID;
+		public List<SeedPoint> Points { get; private set; }
+		public Seed Head { get; private set; }
+		public StreamLine(Seed Head)
 		{
-			try
-			{
-				int step = i / lineSize;
-				List<Point> temp_points = new List<Point>(npoints);
-				for (int j = i; j < i + pointsSize; j += pointSize)
-				{
-					double[] pos = new double[nparam / 2];
-					double[] vel = new double[nparam / 2];
-					for (int k = 0; k < nparam / 2; k++)
-					{
-						pos[k] = BitConverter.ToDouble(bytes, j + sizeof(double) * k);
-						vel[k] = BitConverter.ToDouble(bytes, j + sizeof(double) * (k + nparam / 2));
-					}
-					temp_points.Add(new Point(pos, vel));
-				}
-				double FTLE = BitConverter.ToDouble(bytes, i + pointsSize);
-				maxFTLE = Math.Max(maxFTLE, FTLE);
-				points.Add(new Seed(temp_points, step));
-			}
-			catch
-			{
-				Console.WriteLine("Error in " + filename);
-			}
+			this.Head = Head;
+			Points = new List<SeedPoint>();
+			ID = IDCount;
+			IDCount++;
 		}
-		foreach (Seed s in points)
+
+		public void CalculateStreamLine(object Steps_dt_Semaphore_Notifier)
 		{
-			s.FTLE = maxFTLE;
+			List<object> param = (List<object>)Steps_dt_Semaphore_Notifier;
+			int steps = (int)param[0];
+			double dt = (double)param[1];
+			Semaphore semaphore = (Semaphore)param[2];
+			ManualResetEvent notifier = (ManualResetEvent)param[3];
+
+			int startstep = 0;
+			byte[] output = new byte[0];
+
+			// TODO: create file with header
+
+			for (int i = startstep; i < steps; i++)
+			{
+				semaphore.WaitOne();
+				Head.Calculate((float)dt);
+				Points.Add(Head.Simplify());
+				semaphore.Release();
+				// TODO: append into file
+				if ((100 * (float)(i - startstep) / (steps - startstep)) % 25 == 0)
+					Console.WriteLine(ID + "\t:\t" + (100 * (i - startstep) / (steps - startstep)) + " % Done");
+			}
+			
 		}
-		//Debug.Log("MaxFTLE = " + maxFTLE);
-	}
-
-	public StreamLine()
-	{
-		points = new List<Seed>();
-	}
-
-	public void AddPoint(Seed newseed)
-	{
-		if (points.Count > 0)
+		
+		public static void ResetCount()
 		{
-			if (points[0].FTLE > newseed.FTLE)
-			{
-				newseed.FTLE = points[0].FTLE;
-			}
-			else
-			{
-				foreach (Seed s in points)
-				{
-					s.FTLE = newseed.FTLE;
-				}
-			}
+			IDCount = 0;
 		}
-		points.Add(newseed);
-	}
-
-	public List<Seed> GetPoints()
-	{
-		return points;
 	}
 }

@@ -1,149 +1,39 @@
-﻿using AdvectionCalc.src;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 
-public class Advection
+namespace AdvectionCalculationsGUI.src
 {
-	public InputDataSet DS {get; private set;}
-	public FTLEDataSet FDS { get; private set; }
-	//private double dt = 0.05;
-	private List<Seed> seeds;
-
-	public Advection(InputDataSet DS, FTLEDataSet FDS)
+	class Advection
 	{
-		this.DS = DS;
-		this.FDS = FDS;
-	}
+		public InputDataSet IDS { get; private set;}
+		public StreamLines SLS { get; private set; }
 
-	
-	private Semaphore semaphore;
-	private object fdslock = new object();
-	private ManualResetEvent notifier;
-	private string folder;
-
-	public List<Thread> Start(float radius, int steps, double dt, List<Point> entryPoints, int maxThreads, string folder, ManualResetEvent notifier)//object Radius_Steps_DT_EntryPoints_NThreads)
-	{
-		//List<object> param = (List<object>)Radius_Steps_DT_EntryPoints_NThreads;
-		//float radius = (float)param[0];
-		//int steps = (int)param[1];
-		//dt = (double)param[2];
-		//List<Point> entryPoints = (List<Point>)param[3];
-		//int maxThreads = (int)param[4];
-		this.folder = folder;
-		this.notifier = notifier;
-
-		List<Thread> threads = new List<Thread>(maxThreads);
-
-		seeds = new List<Seed>();
-
-		semaphore = new Semaphore(maxThreads, maxThreads);
-		Console.WriteLine("Total points: " + entryPoints.Count);
-
-		
-
-		for (int i = 0; i < entryPoints.Count; i++)
+		public Advection(InputDataSet ids, StreamLines sls)
 		{
-			Point p = entryPoints[i];
-			Thread t = new Thread(CalculateSeed);
-			t.Start(new List<object> { i, p, steps, dt, radius });
-			threads.Add(t);
+			IDS = ids;
+			SLS = sls;
 		}
 
-		/*foreach(Thread t in threads)
+		private Semaphore semaphore;
+		private ManualResetEvent notifier;
+
+		public List<Thread> Start(float radius, int steps, double dt, List<Point> entryPoints, int maxThreads, ManualResetEvent notifier)
 		{
-			t.Join();
-		}
+			this.notifier = notifier;
+			List<Thread> threads = new List<Thread>(maxThreads);
+			semaphore = new Semaphore(maxThreads, maxThreads);
 
-		Console.WriteLine("All Done!");*/
-		return threads;
-	}
-
-	private void CalculateSeed(object ID_Point_Steps_dt_radius)
-	{
-		List<object> param = (List<object>)ID_Point_Steps_dt_radius;
-		int ID = (int)param[0];
-		Point entry = (Point)param[1];
-		int steps = (int)param[2];
-		double dt = (double)param[3];
-		float radius = (float)param[4];
-
-		Seed seed;
-		int startstep = 0;
-		byte[] output = new byte[0];
-
-		if (File.Exists(folder + "/ID_" + ID + ".dat"))
-		{
-			int npoints = 5;
-			int nparam = 6;
-			int pointSize = nparam * sizeof(double);
-			int pointsSize = npoints * pointSize;
-			int lineSize = pointsSize + sizeof(double);
-
-			byte[] data = File.ReadAllBytes(folder + "/ID_" + ID + ".dat");
-
-			int lastStepStart = data.Length - lineSize;
-			startstep = data.Length / lineSize;
-
-			List<Point> points = new List<Point>(npoints);
-			for (int j = lastStepStart; j < lastStepStart + pointsSize; j += pointSize)
+			StreamLine.ResetCount();
+			foreach (Point p in entryPoints)
 			{
-				double[] pos = new double[nparam / 2];
-				double[] vel = new double[nparam / 2];
-				for (int k = 0; k < nparam / 2; k++)
-				{
-					pos[k] = BitConverter.ToDouble(data, j + sizeof(double) * k);
-					vel[k] = BitConverter.ToDouble(data, j + sizeof(double) * (k + nparam / 2));
-				}
-				points.Add(new Point(pos, vel));
+				StreamLine sl = new StreamLine(new Seed(p, radius, IDS));
+				SLS.AddLine(sl);
+				Thread t = new Thread(sl.CalculateStreamLine);
+				t.Start(new List<object> { steps, dt, semaphore, notifier });
+				threads.Add(t);
 			}
-
-			seed = new Seed(points, radius);
-			Console.WriteLine("File exists. Start with step " + startstep);
+			return threads;
 		}
-		else
-		{
-			seed = new Seed(entry, radius, DS);
-		}
-
-		double maxFTLE = double.NegativeInfinity;
-		for (int i = startstep; i < steps; i++)
-		{
-			semaphore.WaitOne();
-			double FTLE = Math.Log(seed.Calculate(DS, dt));
-
-			if (double.IsInfinity(FTLE))
-			{
-				Console.WriteLine("[WARNING] FTLE is INF for " + ID + " step " + i);
-				FTLE = 0;
-			}
-
-			if (FTLE > maxFTLE)
-			{
-				maxFTLE = FTLE;
-				seed.FTLE = maxFTLE;
-			}
-
-			output = output.Concat(seed.Serialize()).ToArray();
-			output = output.Concat(BitConverter.GetBytes(FTLE)).ToArray();
-			semaphore.Release();
-			if ((100 * (float)(i - startstep) / (steps - startstep)) % 25 == 0)
-				Console.WriteLine(ID + "\t:\t" + (100 * (i - startstep) / (steps - startstep)) + " % Done");
-
-			lock (fdslock)
-			{
-				FDS.AddPoint(seed.Clone(), ID);
-			}
-		}
-
-		
-		using (FileStream fileStream = new FileStream(folder  + "/ID_" + ID + ".dat", FileMode.Append))
-		{
-			fileStream.Write(output, 0, output.Length);
-		}
-
-		notifier.Set();
 	}
 }

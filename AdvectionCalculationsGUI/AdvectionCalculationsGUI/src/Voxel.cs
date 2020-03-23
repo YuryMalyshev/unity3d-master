@@ -2,80 +2,108 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-public class Voxel
+namespace AdvectionCalculationsGUI.src
 {
-	private List<Point> points = new List<Point>();
-	public readonly double[] boundary;
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="xo">X origin</param>
-	/// <param name="yo">Y origin</param>
-	/// <param name="zo">Z origin</param>
-	/// <param name="xm">X maximum</param>
-	/// <param name="ym">Y maximum</param>
-	/// <param name="zm">X maximum</param>
-	public Voxel(double xo, double yo, double zo, double xm, double ym, double zm)
+	public class Voxel<T> where T : Point
 	{
-		double[] boundary = { xo, yo, zo, xm, ym, zm };
-		this.boundary = boundary;
-	}
+		public List<T> Points { get; private set; }
 
-	public List<Point> GetPoints()
-	{
-		return points;
-	}
+		// 4 5 | 0 1
+		// 6 7 | 2 3
+		public readonly Vector3[] vertices;
 
-	/// <summary>
-	/// If the point belongs to the Voxel, adds it. Returns True on success.
-	/// </summary>
-	/// <param name="p"></param>
-	/// <returns>True if the point was added</returns>
-	public bool AddPoint(Point p)
-	{
-		if (IsPointInside(p))
+		private void Initialize(Vector3 minCorner, Vector3 maxCorner)
 		{
-			points.Add(p);
-			return true;
+			Points = new List<T>();
+
+			vertices[3] = minCorner;
+			vertices[4] = maxCorner;
+
+			vertices[0] = new Vector3(vertices[4].X, vertices[4].Y, vertices[3].Z);
+			vertices[1] = new Vector3(vertices[3].X, vertices[4].Y, vertices[3].Z);
+			vertices[2] = new Vector3(vertices[4].X, vertices[3].Y, vertices[3].Z);
+
+			vertices[5] = new Vector3(vertices[3].X, vertices[4].Y, vertices[4].Z);
+			vertices[6] = new Vector3(vertices[4].X, vertices[3].Y, vertices[4].Z);
+			vertices[7] = new Vector3(vertices[3].X, vertices[3].Y, vertices[4].Z);
 		}
-		return false;
-	}
 
-	/// <summary>
-	/// Check if the point is inside of the Voxel
-	/// </summary>
-	/// <param name="p"></param>
-	/// <returns></returns>
-	public bool IsPointInside(Point p)
-	{
-		return IsPointInside(p.Pos);
-	}
-
-	public bool IsPointInside(Vector3 Pos)
-	{
-		return (Pos.X < boundary[3] && Pos.X >= boundary[0]) &&
-					(Pos.Y < boundary[4] && Pos.Y >= boundary[1]) &&
-					(Pos.Z < boundary[5] && Pos.Z >= boundary[2]);
-	}
-
-	public bool IsNeighbor(double[] boundary)
-	{
-		if (boundary.Length != this.boundary.Length)
-			throw new Exception("Not the boundary!");
-
-		for(int i = 0; i < this.boundary.Length; i++)
+		public Voxel(Vector3[] vertices)
 		{
-			for(int j = 0; j < boundary.Length; j++)
+			Points = new List<T>();
+			this.vertices = new Vector3[vertices.Length];
+			vertices.CopyTo(this.vertices, 0);
+		}
+
+		public Voxel(Vector3 minCorner, Vector3 maxCorner)
+		{
+			vertices = new Vector3[8];
+			Initialize(minCorner, maxCorner);
+		}
+
+		public Voxel(double minX, double minY, double minZ, double maxX, double maxY, double maxZ)
+		{
+			vertices = new Vector3[8];
+			Vector3 minCorner = new Vector3((float)minX, (float)minY, (float)minZ);
+			Vector3 maxCorner = new Vector3((float)maxX, (float)maxY, (float)maxZ);
+			Initialize(minCorner, maxCorner);
+		}
+
+		/// <summary>
+		/// If the point belongs to the Voxel, adds it. Returns True on success.
+		/// </summary>
+		/// <param name="p"></param>
+		/// <returns>True if the point was added</returns>
+		public bool AddPoint(T p)
+		{
+			if (IsPointInside(p))
 			{
-				if (this.boundary[i] == boundary[j])
-					return true;
+				Points.Add(p);
+				return true;
 			}
+			return false;
 		}
-		return false;
-	}
 
-	public int Size()
-	{
-		return points.Count;
+		/// <summary>
+		/// Check if the point is inside of the Voxel
+		/// </summary>
+		/// <param name="p"></param>
+		/// <returns></returns>
+		public bool IsPointInside(T p)
+		{
+			return IsPointInside(p.Pos);
+		}
+
+		public bool IsPointInside(Vector3 Pos)
+		{
+			return (Pos.X < vertices[4].X && Pos.X >= vertices[3].X) &&
+					 (Pos.Y < vertices[4].Y && Pos.Y >= vertices[3].Y) &&
+				    (Pos.Z < vertices[4].Z && Pos.Z >= vertices[3].Z);
+		}
+
+		public bool IsNeighborOf(Voxel<T> voxel)
+		{
+			foreach(Vector3 v1 in vertices)
+			{
+				foreach(Vector3 v2 in voxel.vertices)
+				{
+					if(v1.Equals(v2))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		public int Size()
+		{
+			return Points.Count;
+		}
+
+		public double GetVoxelDimension()
+		{
+			return Math.Abs(vertices[0].X - vertices[1].X);
+		}
 	}
 }

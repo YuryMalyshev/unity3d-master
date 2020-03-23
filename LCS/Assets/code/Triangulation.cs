@@ -12,7 +12,7 @@ public class Triangulation : MonoBehaviour
 {
 	private Surface surface;
 	private List<Triangle> triangles;
-	public List<List<Seed>> seeds;
+	public List<List<Seed_DEPRECATED>> seeds;
 	public Shader shader;
 	public static readonly int[,] order = new int[,] {
 	{0 , 1 },
@@ -31,25 +31,26 @@ public class Triangulation : MonoBehaviour
 	public bool newtask = false;
 	private enum DrawStatus
 	{
-		waiting, processing, ready
+		notReady, waiting, processing, ready
 	}
-	private DrawStatus status;
-	FTLEField f;
+	private DrawStatus status = DrawStatus.notReady;
+	FTLEField_DEPRECATED f;
 	void Start()
 	{
 		surface = new Surface();
 		Surface.shader = shader;
 		triangles = new List<Triangle>();
-		f = new FTLEField("D:/Users/yrmal/Desktop/output/FTLEField.dat");
-		seeds = new List<List<Seed>>();
+		f = new FTLEField_DEPRECATED("D:/Users/yrmal/Desktop/output/FTLEField.dat");
+		status = DrawStatus.waiting;
+		seeds = new List<List<Seed_DEPRECATED>>();
 		Debug.Log(f.field.GetLength(0));
 		Debug.Log(f.field.GetLength(1));
 		for (int i = 0; i < f.field.GetLength(0); i++)
 		{
-			seeds.Add(new List<Seed>());
+			seeds.Add(new List<Seed_DEPRECATED>());
 			for (int j = 0; j < f.field.GetLength(1); j++)
 			{
-				Seed s = new Seed(new double[] { i*0.01, j*0.01, 0 });
+				Seed_DEPRECATED s = new Seed_DEPRECATED(new double[] { i*0.01, j*0.01, 0 });
 				s.FTLE = f.field[i, j];
 				seeds[i].Add(s);
 				if(s.FTLE < AbsLevelMin)
@@ -65,19 +66,12 @@ public class Triangulation : MonoBehaviour
 		levelRange = AbsLevelMax - AbsLevelMin;
 		Debug.Log(seeds.Count);
 		Debug.Log(seeds[0].Count);
-		
 	}
 
 	private Tuple<Thread, object> task_param;
 	// Update is called once per frame
 	void Update()
 	{
-		/*if (redraw)
-		{
-			Thread thread = new Thread(ReavalutateSurface);
-			thread.Start();
-			redraw = false;
-		}*/
 		if(status == DrawStatus.waiting)
 		{
 			// Do nothing
@@ -120,12 +114,12 @@ public class Triangulation : MonoBehaviour
 		{
 			for (int j = 0; j < seeds[0].Count; j++)
 			{
-				Seed A = seeds[i][j];
+				Seed_DEPRECATED A = seeds[i][j];
 				if (A.FTLE >= levelMin && A.FTLE <= levelMax)
 				{
 					//Debug.Log("=============" + A.pos + "=============");
-					Seed B = null;
-					Seed C = null;
+					Seed_DEPRECATED B = null;
+					Seed_DEPRECATED C = null;
 
 					for (int k = 0; k < 9; k++)
 					{
@@ -208,6 +202,11 @@ public class Triangulation : MonoBehaviour
 
 	public void ReDraw()
 	{
+		if(status == DrawStatus.notReady)
+		{
+			// TODO: show warning
+			return;
+		}
 		double median = layerFraction * levelRange + AbsLevelMin;
 		double width = widthFraction * levelRange;
 		double levelMin = median - width;

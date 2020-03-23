@@ -459,7 +459,7 @@ namespace AdvectionCalculationsGUI
 			this.resolution.Size = new System.Drawing.Size(100, 22);
 			this.resolution.TabIndex = 13;
 			this.resolution.TextChanged += new System.EventHandler(this.GenericTextChange);
-			this.resolution.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.GenericTextBoxKeyPress);
+			this.resolution.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IntegerTextBoxKeyPress);
 			this.resolution.Leave += new System.EventHandler(this.GenericTextBoxLeave);
 			// 
 			// dt
@@ -508,6 +508,7 @@ namespace AdvectionCalculationsGUI
 			// 
 			this.fieldNormilizerWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
 			this.fieldNormilizerWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.ProgressChanged);
+			this.fieldNormilizerWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WorkerDone);
 			// 
 			// GUI
 			// 

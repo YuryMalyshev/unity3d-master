@@ -65,7 +65,7 @@ class Surface
 
 	public void Make()
 	{
-		List<Seed> seedVertices = new List<Seed>();
+		List<Seed_DEPRECATED> seedVertices = new List<Seed_DEPRECATED>();
 		//update only needed vertices, colors and triangles
 
 		

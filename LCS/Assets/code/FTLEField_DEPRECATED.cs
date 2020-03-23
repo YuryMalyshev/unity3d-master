@@ -6,11 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class FTLEField
+public class FTLEField_DEPRECATED
 {
 	public readonly double[,] field;
 
-	public FTLEField(string filename)
+	public FTLEField_DEPRECATED(string filename)
 	{
 		byte[] bytes = File.ReadAllBytes(filename);
 		int index = 0;

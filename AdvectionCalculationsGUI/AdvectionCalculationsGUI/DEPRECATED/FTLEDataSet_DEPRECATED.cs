@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public class FTLEDataSet
+public class FTLEDataSet_DEPRECATED
 {
-	private Dictionary<int, StreamLine> streamLines;
-	public FTLEDataSet(string filedir)
+	private Dictionary<int, StreamLine_DEPRECATED> streamLines;
+	public FTLEDataSet_DEPRECATED(string filedir)
 	{
 		string[] filenames = Directory.GetFiles(filedir, "*.dat");
-		streamLines = new Dictionary<int, StreamLine>(filenames.Length);
+		streamLines = new Dictionary<int, StreamLine_DEPRECATED>(filenames.Length);
 		foreach (string filename in filenames)
 		{
 			try
@@ -20,7 +20,7 @@ public class FTLEDataSet
 				int start = filename.IndexOf("_") + 1;
 				int end = filename.IndexOf(".dat");
 				int ID = int.Parse(filename.Substring(start, end - start));
-				streamLines.Add(ID, new StreamLine("", filename));
+				streamLines.Add(ID, new StreamLine_DEPRECATED("", filename));
 			}
 			catch
 			{
@@ -30,36 +30,36 @@ public class FTLEDataSet
 		Debug.WriteLine("Created " + streamLines.Count + " streamlines");
 	}
 
-	public FTLEDataSet()
+	public FTLEDataSet_DEPRECATED()
 	{
-		streamLines = new Dictionary<int, StreamLine>();
+		streamLines = new Dictionary<int, StreamLine_DEPRECATED>();
 	}
 
-	public void AddPoint(Seed s, int StreamID)
+	public void AddPoint(Seed_DEPRECATED s, int StreamID)
 	{
-		if (streamLines.TryGetValue(StreamID, out StreamLine line))
+		if (streamLines.TryGetValue(StreamID, out StreamLine_DEPRECATED line))
 		{
 			line.AddPoint(s);
 		}
 		else
 		{
-			StreamLine _line = new StreamLine();
+			StreamLine_DEPRECATED _line = new StreamLine_DEPRECATED();
 			_line.AddPoint(s);
 			streamLines.Add(StreamID, _line);
 		}
 	}
 
-	public List<Seed> GetPoints()
+	public List<Seed_DEPRECATED> GetPoints()
 	{
-		List<Seed> points = new List<Seed>();
-		foreach (StreamLine sl in streamLines.Values)
+		List<Seed_DEPRECATED> points = new List<Seed_DEPRECATED>();
+		foreach (StreamLine_DEPRECATED sl in streamLines.Values)
 		{
 			points.AddRange(sl.GetPoints());
 		}
 		return points;
 	}
 
-	public List<Seed> GetLine(int ID)
+	public List<Seed_DEPRECATED> GetLine(int ID)
 	{
 		try
 		{
@@ -67,7 +67,7 @@ public class FTLEDataSet
 		}
 		catch
 		{
-			return new List<Seed>();
+			return new List<Seed_DEPRECATED>();
 		}
 	}
 }

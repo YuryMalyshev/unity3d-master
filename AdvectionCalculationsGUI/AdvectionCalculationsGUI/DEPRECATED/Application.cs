@@ -14,7 +14,7 @@ namespace AdvectionCalc.src
 		{
 			Stopwatch sw = new Stopwatch();
 			sw.Start();
-			FTLEDataSet fds = new FTLEDataSet("D:/UnityWS/AdvectionCalc/AdvectionCalc/bin/Debug/output/");
+			FTLEDataSet_DEPRECATED fds = new FTLEDataSet_DEPRECATED("D:/UnityWS/AdvectionCalc/AdvectionCalc/bin/Debug/output/");
 			//new FTLEField(0.01, 2, 1, fds);
 			sw.Stop();
 			Console.WriteLine("Took " + sw.ElapsedMilliseconds);

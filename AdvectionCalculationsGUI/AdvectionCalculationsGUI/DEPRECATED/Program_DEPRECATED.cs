@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace AdvectionCalc
 {
-	class Program
+	class Program_DEPRECATED
 	{
 		static void Main_1(string[] args)
 		{

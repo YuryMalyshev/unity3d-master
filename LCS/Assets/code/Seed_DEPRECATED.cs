@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Seed : IEquatable<Seed>
+public class Seed_DEPRECATED : IEquatable<Seed_DEPRECATED>
 {
-	private readonly List<Point> points;
+	private readonly List<Point_DEPRECATED> points;
 	public int Step { get; }
 	private bool inUse = false;
 	public double FTLE { get; set; }
 	public Vector3 pos { get => points[0].pos;}
 
-	public Seed(List<Point> points, int Step)
+	public Seed_DEPRECATED(List<Point_DEPRECATED> points, int Step)
 	{
 		this.points = points;
 		this.Step = Step;
@@ -19,10 +19,10 @@ public class Seed : IEquatable<Seed>
 	/// Test
 	/// </summary>
 	/// <param name="pos">[3]</param>
-	public Seed(double[] pos)
+	public Seed_DEPRECATED(double[] pos)
 	{
-		points = new List<Point>();
-		points.Add(new Point(pos, new double[]{0,0,0}));
+		points = new List<Point_DEPRECATED>();
+		points.Add(new Point_DEPRECATED(pos, new double[]{0,0,0}));
 	}
 
 	public void ResetUse()
@@ -40,7 +40,7 @@ public class Seed : IEquatable<Seed>
 		return inUse;
 	}
 
-	public bool Equals(Seed other)
+	public bool Equals(Seed_DEPRECATED other)
 	{
 		return points[0].Equals(other.points[0]);
 	}

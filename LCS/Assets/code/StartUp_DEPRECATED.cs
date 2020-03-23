@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-public class StartUp : MonoBehaviour
+public class StartUp_DEPRECATED : MonoBehaviour
 {
 	public GameObject PointPrefab;
-	private DataSet ds = null;
+	private DataSet_DEPRECATED ds = null;
 	Dictionary<double[], double> points;
-	Painter painter;
+	Painter_DEPRECATED painter;
 	public bool loaddata = false;
 	public string datafolder = "D:/UnityWS/AdvectionCalc/AdvectionCalc/bin/Debug/output/";
 
@@ -25,7 +25,7 @@ public class StartUp : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
-		painter = GameObject.Find("Painter").GetComponent<Painter>();
+		painter = GameObject.Find("Painter").GetComponent<Painter_DEPRECATED>();
 		/*ds = new DataSet("./Assets/inputdata/");
 		Thread t = new Thread(createPoints);
 		t.Start();*/
@@ -37,7 +37,7 @@ public class StartUp : MonoBehaviour
 		if(loaddata)
 		{
 		
-			ds = new DataSet(datafolder);
+			ds = new DataSet_DEPRECATED(datafolder);
 			loaddata = false;
 		}
 		if(draw)
@@ -55,9 +55,9 @@ public class StartUp : MonoBehaviour
 		{
 			if (debugline.Equals("*") || debugline.Equals("all"))
 			{
-				List<Seed> seeds = ds.GetPoints();
+				List<Seed_DEPRECATED> seeds = ds.GetPoints();
 				Debug.Log("Seed count: " + seeds.Count);
-				foreach (Seed s in seeds)
+				foreach (Seed_DEPRECATED s in seeds)
 				{
 					//Debug.Log("Pos: " + s.pos[0] + " " + s.pos[1]);
 					painter.UpdateObject(new List<object> { s.pos, s.pos[0] + " " + s.pos[1], Color.white, 0.01 });
@@ -67,8 +67,8 @@ public class StartUp : MonoBehaviour
 			{
 				try
 				{
-					List<Seed> seeds = ds.GetLine(int.Parse(debugline));
-					foreach (Seed s in seeds)
+					List<Seed_DEPRECATED> seeds = ds.GetLine(int.Parse(debugline));
+					foreach (Seed_DEPRECATED s in seeds)
 					{
 						//Debug.Log("Pos: " + s.pos[0] + " " + s.pos[1]);
 						painter.UpdateObject(new List<object> { s.pos, s.pos[0] + " " + s.pos[1], Color.white, 0.01 });
@@ -82,11 +82,11 @@ public class StartUp : MonoBehaviour
 		}
 		else
 		{
-			List<Seed> seeds = ds.GetPoints();
+			List<Seed_DEPRECATED> seeds = ds.GetPoints();
 			Debug.Log("Seed count: " + seeds.Count);
 			double MAX = double.NegativeInfinity;
 			double MIN = double.PositiveInfinity;
-			foreach (Seed s in seeds)
+			foreach (Seed_DEPRECATED s in seeds)
 			{
 				MAX = Math.Max(MAX, s.FTLE);
 				MIN = Math.Min(MIN, s.FTLE);
@@ -132,10 +132,10 @@ public class StartUp : MonoBehaviour
 		double[] pos = (double[])param[0];
 		double MIN = (double)param[1];
 		double MAX = (double)param[2];
-		List<Seed> seeds = (List<Seed>)param[3];
+		List<Seed_DEPRECATED> seeds = (List<Seed_DEPRECATED>)param[3];
 		double Diff = MAX - MIN;
 		
-		double FTLE = Interpolator.Interpolate(pos, seeds, 0.5);
+		double FTLE = Interpolator_DEPRECATED.Interpolate(pos, seeds, 0.5);
 		points.Add(pos, FTLE);
 
 		double val = (FTLE - MIN) / Diff;
