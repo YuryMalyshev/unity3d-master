@@ -8,9 +8,9 @@ using System.Threading;
 using UnityEditor;
 using UnityEngine;
 
-public class Triangulation : MonoBehaviour
+public class Triangulation_DEPRECATED : MonoBehaviour
 {
-	private Surface surface;
+	private Surface_DEPRECATED surface;
 	private List<Triangle> triangles;
 	public List<List<Seed_DEPRECATED>> seeds;
 	public Shader shader;
@@ -37,8 +37,8 @@ public class Triangulation : MonoBehaviour
 	FTLEField_DEPRECATED f;
 	void Start()
 	{
-		surface = new Surface();
-		Surface.shader = shader;
+		surface = new Surface_DEPRECATED();
+		Surface_DEPRECATED.shader = shader;
 		triangles = new List<Triangle>();
 		f = new FTLEField_DEPRECATED("D:/Users/yrmal/Desktop/output/FTLEField.dat");
 		status = DrawStatus.waiting;

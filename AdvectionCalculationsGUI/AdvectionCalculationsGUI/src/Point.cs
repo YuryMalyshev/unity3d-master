@@ -38,6 +38,20 @@ public class Point : IEquatable<Point>, IComparer<Point>, IComparable<Point>, IC
 		return temp;
 	}
 
+	public static Point DeSerialize(byte[] subset)
+	{
+		Vector3 Pos = new Vector3();
+		Vector3 Vel = new Vector3();
+		int index = 0;
+		Pos.X = BitConverter.ToSingle(subset, index); index += sizeof(float);
+		Pos.Y = BitConverter.ToSingle(subset, index); index += sizeof(float);
+		Pos.Z = BitConverter.ToSingle(subset, index); index += sizeof(float);
+		Vel.X = BitConverter.ToSingle(subset, index); index += sizeof(float);
+		Vel.Y = BitConverter.ToSingle(subset, index); index += sizeof(float);
+		Vel.Z = BitConverter.ToSingle(subset, index);
+		return new Point(Pos, Vel);
+	}
+
 	public Point(Point p)
 	{
 		Pos = p.Pos;

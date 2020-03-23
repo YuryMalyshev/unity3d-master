@@ -67,13 +67,19 @@
     <Compile Include="Assets\code\FTLEField_DEPRECATED.cs" />
     <Compile Include="Assets\code\Interpolator_DEPRECATED.cs" />
     <Compile Include="Assets\code\Painter_DEPRECATED.cs" />
+    <Compile Include="Assets\code\Point.cs" />
     <Compile Include="Assets\code\Point_DEPRECATED.cs" />
     <Compile Include="Assets\code\Seed_DEPRECATED.cs" />
+    <Compile Include="Assets\code\SeedPoint.cs" />
+    <Compile Include="Assets\code\Square.cs" />
     <Compile Include="Assets\code\StartUp_DEPRECATED.cs" />
     <Compile Include="Assets\code\StreamLine_DEPRECATED.cs" />
     <Compile Include="Assets\code\Surface.cs" />
+    <Compile Include="Assets\code\Surface_DEPRECATED.cs" />
     <Compile Include="Assets\code\Triangle.cs" />
-    <Compile Include="Assets\code\Triangulation.cs" />
+    <Compile Include="Assets\code\Triangulation_DEPRECATED.cs" />
+    <Compile Include="Assets\code\Visualization.cs" />
+    <Compile Include="Assets\Test.cs" />
     <None Include="Assets\VertexColored.shader" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/UnityWS/unity3d-master/LCS/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
