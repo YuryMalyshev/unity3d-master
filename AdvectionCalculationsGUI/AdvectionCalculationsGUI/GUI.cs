@@ -498,7 +498,11 @@ namespace AdvectionCalculationsGUI
 				Debug.WriteLine("threads.Count " + threads.Count + " Max " + threadMax +
 				" Fraction " + ((threadMax - threads.Count) * 1000 / threadMax) + "/" + 1000);
 			}
-			field.Serialize(selectOutputFolderDialog.SelectedPath);
+
+			worker.ReportProgress(0);
+			field.CreateSquares(resolution, worker);
+
+			field.Serialize(selectOutputFolderDialog.SelectedPath, worker);
 			Debug.WriteLine("All done!");
 		}
 

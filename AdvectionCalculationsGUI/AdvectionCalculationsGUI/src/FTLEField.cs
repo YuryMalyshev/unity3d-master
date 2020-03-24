@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,21 +14,26 @@ namespace AdvectionCalculationsGUI.src
 		private List<OrderedVoxel<SeedPoint>> voxels = new List<OrderedVoxel<SeedPoint>>();
 		private OrderedVoxel<SeedPoint>[,,] voxelsMatrix;
 		private List<Square<SeedPoint>> squares;
-		private object squaresLock = new object();
 		public FTLEField(InputDataSet ids, int resolution)
 		{
 			Vector3 min = new Vector3(float.PositiveInfinity);
 			Vector3 max = new Vector3(float.NegativeInfinity);
 			foreach (Voxel<Point> v in ids.Voxels)
 			{
-				if(v.vertices[3].X < min.X && v.vertices[3].Y < min.Y && v.vertices[3].Z < min.Z)
-				{
-					min = v.vertices[3];
-				}
-				if (v.vertices[4].X < max.X && v.vertices[4].Y < max.Y && v.vertices[4].Z < max.Z)
-				{
-					max = v.vertices[4];
-				}
+				if (v.vertices[3].X < min.X)
+					min.X = v.vertices[3].X;
+				if (v.vertices[3].Y < min.Y)
+					min.Y = v.vertices[3].Y;
+				if (v.vertices[3].Z < min.Z)
+					min.Z = v.vertices[3].Z;
+
+				if (v.vertices[4].X > max.X)
+					max.X = v.vertices[4].X;
+				if (v.vertices[4].Y > max.Y)
+					max.Y = v.vertices[4].Y;
+				if (v.vertices[4].Z > max.Z)
+					max.Z = v.vertices[4].Z;
+
 				voxels.Add(new OrderedVoxel<SeedPoint>(v.vertices, resolution));
 			}
 			float size = (float)voxels.First().GetVoxelDimension();
@@ -112,9 +118,9 @@ namespace AdvectionCalculationsGUI.src
 			return threads;
 		}
 
-		private void PopulateVoxel(object voxel_norifier_resolution)
+		private void PopulateVoxel(object voxel_notifier_resolution)
 		{
-			List<object> param = (List<object>)voxel_norifier_resolution;
+			List<object> param = (List<object>)voxel_notifier_resolution;
 			OrderedVoxel<SeedPoint> voxel = (OrderedVoxel<SeedPoint>)param[0];
 			ManualResetEvent notifier = (ManualResetEvent)param[1];
 			int resolution = (int)param[2];
@@ -135,9 +141,32 @@ namespace AdvectionCalculationsGUI.src
 					}
 				}
 			}
-			//TODO: create voxel polygons
+			notifier.Set();
+		}
+
+		public void CreateSquares(int resolution, BackgroundWorker worker)
+		{
+			Debug.WriteLine("Creating squares");
+			int total = voxelsMatrix.Length;
+			int count = total;
+			for (int vx = 0; vx < voxelsMatrix.GetLength(0); vx++)
+			{
+				for(int vy = 0; vy < voxelsMatrix.GetLength(1); vy++)
+				{
+					for(int vz = 0; vz < voxelsMatrix.GetLength(2); vz++)
+					{
+						if (voxelsMatrix[vx, vy, vz] != null)
+							FillVertex(resolution, vx, vy, vz);
+						count--;
+						worker.ReportProgress((total - count) * 1000 / total);
+					}
+				}
+			}
+		}
+
+		private void FillVertex(int resolution, int vx, int vy, int vz)
+		{
 			List<SeedPoint> vertices = new List<SeedPoint>(8);
-			List<Square<SeedPoint>> voxelSquares = new List<Square<SeedPoint>>();
 			for (int x = 0; x < resolution; x++)
 			{
 				for (int y = 0; y < resolution; y++)
@@ -145,107 +174,126 @@ namespace AdvectionCalculationsGUI.src
 					for (int z = 0; z < resolution; z++)
 					{
 						vertices.Clear();
-						vertices.Add(voxel.GetPointAt(x  , y  , z  ));
-						vertices.Add(voxel.GetPointAt(x  , y+1, z  ));
-						vertices.Add(voxel.GetPointAt(x+1, y+1, z  ));
-						vertices.Add(voxel.GetPointAt(x+1, y  , z  ));
-						vertices.Add(voxel.GetPointAt(x  , y  , z+1));
-						vertices.Add(voxel.GetPointAt(x  , y+1, z+1));
-						vertices.Add(voxel.GetPointAt(x+1, y+1, z+1));
-						vertices.Add(voxel.GetPointAt(x+1, y  , z+1));
+						vertices.Add(AddVertex(resolution, vx, vy, vz, x, y, z));
+						vertices.Add(AddVertex(resolution, vx, vy, vz, x, y + 1, z));
+						vertices.Add(AddVertex(resolution, vx, vy, vz, x + 1, y + 1, z));
+						vertices.Add(AddVertex(resolution, vx, vy, vz, x + 1, y, z));
+						vertices.Add(AddVertex(resolution, vx, vy, vz, x, y, z + 1));
+						vertices.Add(AddVertex(resolution, vx, vy, vz, x, y + 1, z + 1));
+						vertices.Add(AddVertex(resolution, vx, vy, vz, x + 1, y + 1, z + 1));
+						vertices.Add(AddVertex(resolution, vx, vy, vz, x + 1, y, z + 1));
 
-						voxelSquares.Add(new Square<SeedPoint>(vertices[1], vertices[2], vertices[6], vertices[5]));
-						voxelSquares.Add(new Square<SeedPoint>(vertices[0], vertices[3], vertices[7], vertices[4]));
+						Square<SeedPoint> sq;
 
-						voxelSquares.Add(new Square<SeedPoint>(vertices[2], vertices[3], vertices[7], vertices[6]));
-						voxelSquares.Add(new Square<SeedPoint>(vertices[1], vertices[0], vertices[4], vertices[5]));
+						sq = new Square<SeedPoint>(vertices[1], vertices[2], vertices[6], vertices[5]);
+						if (sq.IsComplete()) squares.Add(sq);
+						sq = new Square<SeedPoint>(vertices[0], vertices[3], vertices[7], vertices[4]);
+						if (sq.IsComplete()) squares.Add(sq);
 
-						voxelSquares.Add(new Square<SeedPoint>(vertices[0], vertices[1], vertices[2], vertices[3]));
-						voxelSquares.Add(new Square<SeedPoint>(vertices[4], vertices[5], vertices[6], vertices[7]));
-					}
-				}
-			}
-			lock(squaresLock)
-			{
-				foreach(Square<SeedPoint> s in voxelSquares)
-				{
-					if (s.IsComplete())
-						squares.Add(s);
-				}
-			}
-			voxelSquares.Clear();
-			notifier.Set();
-		}
+						sq = new Square<SeedPoint>(vertices[2], vertices[3], vertices[7], vertices[6]);
+						if (sq.IsComplete()) squares.Add(sq);
+						sq = new Square<SeedPoint>(vertices[1], vertices[0], vertices[4], vertices[5]);
+						if (sq.IsComplete()) squares.Add(sq);
 
-		public void CreateSquares()
-		{
-			
-		}
-
-		private void FillGaps()
-		{
-			for (int x = 0; x < voxelsMatrix.GetLength(0); x++)
-			{
-				for (int y = 0; y < voxelsMatrix.GetLength(1); y++)
-				{
-					for (int z = 0; z < voxelsMatrix.GetLength(2); z++)
-					{
-						FillVoxelBorder(x, y, z);
-						
+						sq = new Square<SeedPoint>(vertices[0], vertices[1], vertices[2], vertices[3]);
+						if (sq.IsComplete()) squares.Add(sq);
+						sq = new Square<SeedPoint>(vertices[4], vertices[5], vertices[6], vertices[7]);
+						if (sq.IsComplete()) squares.Add(sq);
 					}
 				}
 			}
 		}
 
-		private void FillVoxelBorder(int a, int b, int c)
+		private SeedPoint AddVertex(int resolution, int vx, int vy, int vz, int x, int y, int z)
 		{
-			if (voxelsMatrix[a, b, c] != null)
+			if (voxelsMatrix[vx, vy, vz].TryGetPointAt(x, y, z, out SeedPoint v))
 			{
-				for (int x = 0; x < ; x++)
+				return v;
+			}
+			else
+			{
+				if (x != 0 && (x %= resolution) == 0)
 				{
-					for (int y = 0; y < voxelsMatrix.GetLength(1); y++)
-					{
-						for (int z = 0; z < voxelsMatrix.GetLength(2); z++)
-						{
-							FillVoxelBorder(x, y, z);
-
-						}
-					}
+					vx++;
+					if (vx >= voxelsMatrix.GetLength(0))
+						return null;
+				}
+				if (y != 0 && (y %= resolution) == 0)
+				{
+					vy++;
+					if (vy >= voxelsMatrix.GetLength(1))
+						return null;
+				}
+				if (z != 0 && (z %= resolution) == 0)
+				{
+					vz++;
+					if (vz >= voxelsMatrix.GetLength(2))
+						return null;
+				}
+				if(voxelsMatrix[vx, vy, vz] != null)
+				{
+					if (voxelsMatrix[vx, vy, vz].TryGetPointAt(x, y, z, out v))
+						return v;
 				}
 			}
-			return;
+			return null;
 		}
 
-		public void Serialize(string path)
+		byte[] serialized;
+		private object byteArrayLock = new object();
+		public void Serialize(string path, BackgroundWorker worker) //TODO: MAKE IT QUICKER!
 		{
+			Debug.WriteLine("Serializing...");
+			worker.ReportProgress(0);
+			int total = voxels.Count;
+			int count = total;
 			List<SeedPoint> points = new List<SeedPoint>(voxels.Count);
-			byte[] temp = new byte[0];
 			foreach (Voxel<SeedPoint> v in voxels)
 			{
 				foreach(SeedPoint s in v.Points)
 				{
-					temp = temp.Concat(BitConverter.GetBytes(points.Count)).ToArray();
-					temp = temp.Concat(s.Serialize()).ToArray();
 					points.Add(s);
 				}
+				count--;
+				worker.ReportProgress((total - count) * 250 / total);
+			}
+
+			total = points.Count;
+			serialized = new byte[total * (sizeof(float) * 6 + sizeof(double) + sizeof(int))];
+			for (int i = 0; i < total; i++)
+			{
+				byte[] temp = new byte[0];
+				temp = temp.Concat(BitConverter.GetBytes(i)).ToArray();
+				temp = temp.Concat(points[i].Serialize()).ToArray();
+				worker.ReportProgress((i * 750 / total)+250);
+				Array.Copy(temp, 0, serialized, i * temp.Length, temp.Length);
 			}
 			using (FileStream fileStream = new FileStream(path + "/FTLEField.dat", FileMode.Create))
 			{
-				fileStream.Write(temp, 0, temp.Length);
+				fileStream.Write(serialized, 0, serialized.Length);
 			}
-			temp = new byte[0];
+
+			serialized = new byte[squares.Count*4*sizeof(int)];
+			worker.ReportProgress(0);
+			total = squares.Count;
+			count = total;
+			int index = 0;
 			foreach (Square<SeedPoint> s in squares)
 			{
+				byte[] temp = new byte[0];
 				temp = temp.Concat(BitConverter.GetBytes(points.IndexOf(s.A))).ToArray();
 				temp = temp.Concat(BitConverter.GetBytes(points.IndexOf(s.B))).ToArray();
 				temp = temp.Concat(BitConverter.GetBytes(points.IndexOf(s.C))).ToArray();
 				temp = temp.Concat(BitConverter.GetBytes(points.IndexOf(s.D))).ToArray();
+				Array.Copy(temp, 0, serialized, index, temp.Length);
+				index += (4 * sizeof(int));
+				count--;
+				worker.ReportProgress((total - count) * 1000 / total);
 			}
 			using (FileStream fileStream = new FileStream(path + "/Squares.dat", FileMode.Create))
 			{
-				fileStream.Write(temp, 0, temp.Length);
+				fileStream.Write(serialized, 0, serialized.Length);
 			}
 		}
-
 	}
 }

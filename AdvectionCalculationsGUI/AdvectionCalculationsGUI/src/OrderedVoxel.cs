@@ -20,11 +20,18 @@ namespace AdvectionCalculationsGUI.src
 			matrix[x, y, z] = sp;
 		}
 
-		public T GetPointAt(int x, int y, int z)
+		public bool TryGetPointAt(int x, int y, int z, out T point)
 		{
 			if (x >= matrix.GetLength(0) || y >= matrix.GetLength(1) || z >= matrix.GetLength(2))
-				return null; 
-			return matrix[x, y, z];
+			{
+				point = null;
+				return false;
+			}
+			else
+			{
+				point = matrix[x, y, z];
+				return true;
+			}
 		}
 	}
 }
