@@ -79,8 +79,8 @@ namespace AdvectionCalculationsGUI.src
 			double maxDist = avDistance * (15000f / points.Count * 10); //TODO: based on amount
 			foreach (Point p in points)
 			{
-				/*// Update limits
-				*/
+				
+				// Update limits
 				// Point p is at least maxDist away from any other drawn point
 				double localMin = double.PositiveInfinity;
 				foreach (Point pd in PointsToDraw)

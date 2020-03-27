@@ -63,9 +63,6 @@ namespace AdvectionCalculationsGUI.src
 					}
 					else
 					{
-						//double x = Math.Ceiling(p.Pos.X / voxelSize) * voxelSize + Voxels[0].vertices[3].X;
-						//double y = Math.Ceiling(p.Pos.Y / voxelSize) * voxelSize + Voxels[0].vertices[3].Y;
-						//double z = Math.Ceiling(p.Pos.Z / voxelSize) * voxelSize + Voxels[0].vertices[3].Z;
 						double x = Math.Floor((p.Pos.X + Voxels[0].vertices[3].X) / voxelSize) * voxelSize - Voxels[0].vertices[3].X;
 						double y = Math.Floor((p.Pos.Y + Voxels[0].vertices[3].Y) / voxelSize) * voxelSize - Voxels[0].vertices[3].Y;
 						double z = Math.Floor((p.Pos.Z + Voxels[0].vertices[3].Z) / voxelSize) * voxelSize - Voxels[0].vertices[3].Z;
