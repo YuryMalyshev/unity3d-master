@@ -46,13 +46,14 @@ namespace AdvectionCalculationsGUI.src
 				int z = (int)Math.Round((v.vertices[3].Z - min.Z) / size);
 				voxelsMatrix[x, y, z] = v;
 			}
-
+			Debug.WriteLine("Min " + min + " Max " + max);
 			squares = new List<Square<SeedPoint>>();
 		}
 
 		List<SeedPoint> bulkList = null;
 		readonly object bulkListLock = new object();
-		public List<Thread> PrepareField(ManualResetEvent notifier, StreamLines sls)
+		private Semaphore semaphore;
+		public List<Thread> PrepareField(ManualResetEvent notifier, StreamLines sls, int maxThreads)
 		{
 			List<StreamLine> streamLines = sls.GetStreamLines();
 			if (streamLines.Count > 0)
@@ -63,7 +64,8 @@ namespace AdvectionCalculationsGUI.src
 				bulkList = new List<SeedPoint>();
 			}
 			List<Thread> threads = new List<Thread>(streamLines.Count);
-			foreach(StreamLine sl in streamLines)
+			semaphore = new Semaphore(maxThreads, maxThreads);
+			foreach (StreamLine sl in streamLines)
 			{
 				Thread t = new Thread(AnalyzeLine);
 				t.Start(new List<object> { sl, notifier });
@@ -79,7 +81,8 @@ namespace AdvectionCalculationsGUI.src
 			ManualResetEvent notifier = (ManualResetEvent)param[1];
 
 			double maxFTLE = double.NegativeInfinity;
-			foreach(SeedPoint sp in sl.Points)
+			semaphore.WaitOne();
+			foreach (SeedPoint sp in sl.Points)
 			{
 				if(sp.FTLE > maxFTLE)
 				{
@@ -94,6 +97,7 @@ namespace AdvectionCalculationsGUI.src
 					bulkList.Add(newSp);
 				}
 			}
+			semaphore.Release();
 			notifier.Set();
 		}
 		/// <summary>
@@ -102,13 +106,15 @@ namespace AdvectionCalculationsGUI.src
 		/// <param name="notifier"></param>
 		/// <param name="resolution"> amount of points on an edge of a voxel</param>
 		/// <returns></returns>
-		public List<Thread> Start(ManualResetEvent notifier, int resolution)
+		public List<Thread> Start(ManualResetEvent notifier, int resolution, int maxThreads)
 		{
 			if(bulkList == null)
 			{
 				throw new Exception("StreamLines not yet loaded. Call PrepareField(...) first!");
 			}
+			semaphore = new Semaphore(maxThreads, maxThreads);
 			List<Thread> threads = new List<Thread>(voxels.Count);
+			Debug.WriteLine("Count of voxels " + voxels.Count);
 			foreach(OrderedVoxel<SeedPoint> v in voxels)
 			{
 				Thread t = new Thread(PopulateVoxel);
@@ -129,6 +135,7 @@ namespace AdvectionCalculationsGUI.src
 			{
 				for(int y = 0; y < resolution; y ++)
 				{
+					semaphore.WaitOne();
 					for (int z = 0; z < resolution; z ++)
 					{
 						SeedPoint sp = Interpolator<SeedPoint>.NNInterpolatePoint(
@@ -139,6 +146,7 @@ namespace AdvectionCalculationsGUI.src
 						voxel.AddPoint(sp);
 						voxel.AddPointAt(sp, x, y, z);
 					}
+					semaphore.Release();
 				}
 			}
 			notifier.Set();
@@ -212,7 +220,7 @@ namespace AdvectionCalculationsGUI.src
 			}
 			else
 			{
-				if (x != 0 && (x %= resolution) == 0)
+				if (x != 0 && (x %= resolution) == 0) // outer edge
 				{
 					vx++;
 					if (vx >= voxelsMatrix.GetLength(0))
@@ -240,7 +248,6 @@ namespace AdvectionCalculationsGUI.src
 		}
 
 		byte[] serialized;
-		private object byteArrayLock = new object();
 		public void Serialize(string path, BackgroundWorker worker) //TODO: MAKE IT QUICKER!
 		{
 			Debug.WriteLine("Serializing...");
@@ -248,7 +255,7 @@ namespace AdvectionCalculationsGUI.src
 			int total = voxels.Count;
 			int count = total;
 			List<SeedPoint> points = new List<SeedPoint>(voxels.Count);
-			foreach (Voxel<SeedPoint> v in voxels)
+			foreach (OrderedVoxel<SeedPoint> v in voxels)
 			{
 				foreach(SeedPoint s in v.Points)
 				{

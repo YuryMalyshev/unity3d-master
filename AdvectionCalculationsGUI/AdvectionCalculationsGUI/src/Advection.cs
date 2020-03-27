@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 
 namespace AdvectionCalculationsGUI.src
@@ -16,22 +17,26 @@ namespace AdvectionCalculationsGUI.src
 		}
 
 		private Semaphore semaphore;
-		private ManualResetEvent notifier;
 
-		public List<Thread> Start(float radius, int steps, double dt, List<Point> entryPoints, int maxThreads, ManualResetEvent notifier)
+		public List<Thread> Start(float radius, int steps, double dt, int direction, List<Point> entryPoints, int maxThreads, 
+		ManualResetEvent notifier, BackgroundWorker worker)
 		{
-			this.notifier = notifier;
 			List<Thread> threads = new List<Thread>(maxThreads);
 			semaphore = new Semaphore(maxThreads, maxThreads);
 
 			StreamLine.ResetCount();
+			worker.ReportProgress(0);
+			int total = entryPoints.Count;
+			int count = total;
 			foreach (Point p in entryPoints)
 			{
 				StreamLine sl = new StreamLine(new Seed(p, radius, IDS));
 				SLS.AddLine(sl);
 				Thread t = new Thread(sl.CalculateStreamLine);
-				t.Start(new List<object> { steps, dt, semaphore, notifier });
+				t.Start(new List<object> { steps, dt, direction, semaphore, notifier });
 				threads.Add(t);
+				count--;
+				worker.ReportProgress((total - count) * 1000 / total);
 			}
 			return threads;
 		}

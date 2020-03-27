@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace AdvectionCalculationsGUI.src
@@ -64,6 +65,11 @@ namespace AdvectionCalculationsGUI.src
 			return false;
 		}
 
+		public void ForceAddPoint(T p)
+		{
+			Points.Add(p);
+		}
+
 		/// <summary>
 		/// Check if the point is inside of the Voxel
 		/// </summary>
@@ -76,9 +82,14 @@ namespace AdvectionCalculationsGUI.src
 
 		public bool IsPointInside(Vector3 Pos)
 		{
-			return (Pos.X < vertices[4].X && Pos.X >= vertices[3].X) &&
-					 (Pos.Y < vertices[4].Y && Pos.Y >= vertices[3].Y) &&
-				    (Pos.Z < vertices[4].Z && Pos.Z >= vertices[3].Z);
+			bool val = (Pos.X < vertices[4].X && Pos.X >= vertices[3].X) &&
+						  (Pos.Y < vertices[4].Y && Pos.Y >= vertices[3].Y) &&
+						  (Pos.Z < vertices[4].Z && Pos.Z >= vertices[3].Z);
+			if (Pos.Z > 0)
+			{
+				//Debug.WriteLine(Pos);
+			}
+			return val;
 		}
 
 		public bool IsNeighborOf(Voxel<T> voxel)

@@ -14,33 +14,13 @@ namespace AdvectionCalculationsGUI
 	public partial class GUI : Form
 	{
 		// graphics
-		private readonly Pen dotPen;
-		private readonly Pen linePen;
-		private readonly Pen pointerPen;
-
-		private Bitmap completeBackground;
-		private Bitmap lastFrame;
-		private Bitmap newFrame;
-		private List<Point> pointsToDraw;
-		private List<List<Point>> lines = new List<List<Point>>();
-
-		double xMin = 0;
-		double xMax = 0;
-		double yMin = 0;
-		double yMax = 0;
-
-		double ratio = 0;
-		double offX = 0;
-		double offY = 0;
-
-		private int snapDist;
-		private bool snap = false;
-
+		Picture picture;
 		// Data
 		private InputDataSet ids;
 		private StreamLines sls;
 		//private FTLEField ffield;
 		private bool dataLoaded = false;
+		private int dir;
 
 		// Timing check
 		private Stopwatch sw = new Stopwatch();
@@ -49,8 +29,15 @@ namespace AdvectionCalculationsGUI
 		{
 			// Initialize
 			InitializeComponent();
+			this.xm90.Click += (sender, EventArgs) => { this.ChangeRotationDecrease(sender, EventArgs, 1); };
+			this.ym90.Click += (sender, EventArgs) => { this.ChangeRotationDecrease(sender, EventArgs, 2); };
+			this.zm90.Click += (sender, EventArgs) => { this.ChangeRotationDecrease(sender, EventArgs, 3); };
+			this.xp90.Click += (sender, EventArgs) => { this.ChangeRotationIncrease(sender, EventArgs, 1); };
+			this.yp90.Click += (sender, EventArgs) => { this.ChangeRotationIncrease(sender, EventArgs, 2); };
+			this.zp90.Click += (sender, EventArgs) => { this.ChangeRotationIncrease(sender, EventArgs, 3); };
 			ResetFields();
 			fieldNormilizerWorker.WorkerReportsProgress = true;
+			loadDataWorker.WorkerReportsProgress = true;
 			this.progressBar.Maximum = 1000;
 
 			// Create tooltips
@@ -62,21 +49,12 @@ namespace AdvectionCalculationsGUI
 			(this.canvas as Control).KeyDown += new KeyEventHandler(CanvasKeyDown);
 			(this.canvas as Control).KeyUp += new KeyEventHandler(CanvasKeyUp);
 
-			// Create pens
-			dotPen = new Pen(Color.Black, 2);
-			linePen = new Pen(Color.Green, 2);
-			pointerPen = new Pen(Color.Red, 5);
-
-			// Set snapping distance
-			snapDist = (int)(pointerPen.Width * 4);
-
-			// List of points which will be actually drawn
-			pointsToDraw = new List<Point>();
+			picture = new Picture();
 		}
 
 		private void GUI_Load(object sender, EventArgs e)
 		{
-			lines.Add(new List<Point>());
+			
 		}
 
 		/// <summary>
@@ -107,85 +85,8 @@ namespace AdvectionCalculationsGUI
 		/// </summary>
 		private void LoadData_Click(object sender, EventArgs e)
 		{
-			xMin = double.PositiveInfinity;
-			xMax = double.NegativeInfinity;
-			yMin = double.PositiveInfinity;
-			yMax = double.NegativeInfinity;
-
-			this.outputSettingsPanel.Enabled = true; //TODO: reset values
-			ids = new InputDataSet(selectDataDalog.FileName, double.Parse(voxelSize.Text));
-			List<Point> points = ids.GetPoints();
-			//TODO: based on amount
-			double maxDist = double.Parse(this.avDistance.Text) * (15000f / points.Count * 10);
-
-			pointsToDraw.Clear();
-			foreach (Point p in points)
-			{
-				// Update limits
-				if(p.Pos.X < xMin)
-				{
-					xMin = p.Pos.X;
-				}
-				if(p.Pos.Y < yMin)
-				{
-					yMin = p.Pos.Y;
-				}
-
-				if (p.Pos.X > xMax)
-				{
-					xMax = p.Pos.X;
-				}
-				if (p.Pos.Y > yMax)
-				{
-					yMax = p.Pos.Y;
-				}
-				// Take points only outside of a certain radius from existing
-				double localMin = double.PositiveInfinity;
-				foreach (Point pd in pointsToDraw)
-				{
-					double dist = pd.DistanceTo(p);
-					if (localMin > dist)
-					{
-						localMin = dist;
-					}
-					if (dist < maxDist)
-					{
-						break;
-					}
-				}
-				if (localMin > maxDist)
-				{
-					pointsToDraw.Add(p);
-				}
-			}
-			dataLoaded = true;
-			DrawData();
-		}
-
-		/// <summary>
-		/// Draws the data into a bitmap. The picture is then reused on redraw
-		/// </summary>
-		private void DrawData()
-		{
-			completeBackground = new Bitmap(canvas.Width, canvas.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-			Graphics g = Graphics.FromImage(completeBackground);
-			g.Clear(Color.White);
-			if (dataLoaded)
-			{
-				// Scaling ratio
-				ratio = Math.Min((completeBackground.Width * 0.75) / (xMax - xMin), (completeBackground.Height * 0.75) / (yMax - yMin));
-				// Constant offset from a corner, such that data apppears to be in the center
-				offX = completeBackground.Width / 2 - (xMax - xMin) / 2 * ratio;
-				offY = completeBackground.Height / 2 - (yMax - yMin) / 2 * ratio;
-				foreach (Point p in pointsToDraw)
-				{
-					g.DrawEllipse(dotPen, (float)(p.Pos.X * ratio + offX - dotPen.Width),
-												(float)(p.Pos.Y * ratio + offY - dotPen.Width),
-												dotPen.Width, dotPen.Width);
-				}
-			}
-			g.Dispose();
-			canvas.Image = completeBackground;
+			this.outputSettingsPanel.Enabled = true;
+			loadDataWorker.RunWorkerAsync();
 		}
 
 		/// <summary>
@@ -223,99 +124,27 @@ namespace AdvectionCalculationsGUI
 		/// </summary>
 		private void Canvas_MouseMove(object sender, MouseEventArgs e)
 		{
-			if (lastFrame != null)
-				lastFrame.Dispose();
-			lastFrame = newFrame;
-			newFrame = new Bitmap(canvas_holder.Width, canvas_holder.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-			Graphics frame = Graphics.FromImage(newFrame);
-			frame.DrawImageUnscaled(completeBackground, 0, 0);
-
-			Point last = null;
-			foreach (List<Point> line in lines)
-			{
-				last = null;
-				foreach (Point p in line)
-				{
-					if (last != null)
-					{
-						int pX = (int)((float)(p.Pos.X * ratio + offX - dotPen.Width));
-						int pY = (int)((float)(p.Pos.Y * ratio + offY - dotPen.Width));
-						int lastX = (int)((float)(last.Pos.X * ratio + offX - dotPen.Width));
-						int lastY = (int)((float)(last.Pos.Y * ratio + offY - dotPen.Width));
-						frame.DrawLine(linePen, lastX, lastY, pX, pY);
-					}
-					last = p;
-				}
-			}
-
-			int mX = e.X;
-			int mY = e.Y;
-			if (snap)
-			{
-				//Debug.WriteLine("Snapping!");
-				foreach (Point p in pointsToDraw)
-				{
-					int pX = (int)((float)(p.Pos.X * ratio + offX - dotPen.Width));
-					int pY = (int)((float)(p.Pos.Y * ratio + offY - dotPen.Width));
-					if (Math.Sqrt(Math.Pow(pX - mX, 2) + Math.Pow(pY - mY, 2)) < snapDist)
-					{
-						mX = pX;
-						mY = pY;
-						break;
-					}
-				}
-			}
-
-			if (last != null)
-			{
-				int lastX = (int)((float)(last.Pos.X * ratio + offX - dotPen.Width));
-				int lastY = (int)((float)(last.Pos.Y * ratio + offY - dotPen.Width));
-				frame.DrawLine(linePen, lastX, lastY, mX, mY);
-			}
-
-			frame.DrawEllipse(new Pen(Color.Red, 10), mX - 5, mY - 5, 10, 10);
-			frame.Dispose();
-			Canvas_Refresh();
+			picture.UpdateMousePointer(canvas, e.X, e.Y);
 		}
 
 		private void Canvas_Resize(object sender, EventArgs e)
 		{
-			DrawData();
-			if (lastFrame != null)
-				lastFrame.Dispose();
-			lastFrame = newFrame;
-			newFrame = new Bitmap(canvas_holder.Width, canvas_holder.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-			Graphics frame = Graphics.FromImage(newFrame);
-			frame.DrawImageUnscaled(completeBackground, 0, 0);
-			frame.Dispose();
-			Canvas_Refresh();
-		}
-
-		private void Canvas_Refresh()
-		{
-			canvas.Image = newFrame;
+			if(picture != null)
+				picture.DrawScaledObjectOn(canvas);
 		}
 
 		private void CanvasKeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.KeyCode == Keys.Menu)
-			{
-				snap = true;
-			}
+			// Possible TODO: snapping
 			if (e.KeyCode == Keys.Enter)
 			{
-				lines.Add(new List<Point>());
+				picture.FinishLine();
 			}
-			e.Handled = true;
 		}
 
 		private void CanvasKeyUp(object sender, KeyEventArgs e)
 		{
-			if (e.KeyCode == Keys.Menu)
-			{
-				snap = false;
-			}
-			e.Handled = true;
+			// Possible TODO: snapping
 		}
 
 		private void ResetFields()
@@ -332,77 +161,27 @@ namespace AdvectionCalculationsGUI
 		private void Canvas_GetFocus(object sender, EventArgs e)
 		{
 			canvas.Focus();
+			Cursor.Hide();
 		}
 
 		private void Canvas_MouseClick(object sender, MouseEventArgs e)
 		{
-			//Debug.WriteLine("Click in mouseClick");
-			List<Point> line = lines[lines.Count - 1];
 			if (e.Button == MouseButtons.Left)
 			{
-				Point p = SnapPoint(e);
-				if (p != null)
-				{
-					line.Add(p);
-				}
+				picture.AddPoint(canvas, e.X, e.Y, ids);
 			}
-			if (e.Button == MouseButtons.Right)
+			else if (e.Button == MouseButtons.Right)
 			{
-				if (line.Count > 0)
-				{
-					line.RemoveAt(line.Count - 1);
-				}
-				else
-				{
-					if (lines.Count > 1)
-					{
-						lines.RemoveAt(lines.Count - 1);
-					}
-				}
+				picture.RemovePoint(canvas, e.X, e.Y);
 			}
-		}
+			}
 
-		private Point SnapPoint(MouseEventArgs e)
-		{
-
-			int mX = e.X;
-			int mY = e.Y;
-			if (snap)
-			{
-				//Debug.WriteLine("Snapping!");
-				foreach (Point p in pointsToDraw)
-				{
-					int pX = (int)((float)(p.Pos.X * ratio + offX - dotPen.Width));
-					int pY = (int)((float)(p.Pos.Y * ratio + offY - dotPen.Width));
-					if (Math.Sqrt(Math.Pow(pX - mX, 2) + Math.Pow(pY - mY, 2)) < snapDist)
-					{
-						return p;
-					}
-				}
-			}
-			try
-			{
-				Vector3 pos = new Vector3(
-					(float)((double)(mX - offX) / ratio),
-					(float)((double)(mY - offY) / ratio),
-					0
-				);
-				return ids.GetPoint(pos);
-			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine(ex.StackTrace);
-				return null;
-			}
-		}
-
-		private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+		private void MakeCalculations(object sender, DoWorkEventArgs e)
 		{
 			List<Thread> threads;
 			ManualResetEvent notifier = new ManualResetEvent(false);
 			BackgroundWorker worker = sender as BackgroundWorker;
 			worker.ReportProgress(0);
-
 			Debug.WriteLine("Start doing work!");
 			Advection adv = new Advection(ids, sls);
 			// start advection routine
@@ -411,7 +190,7 @@ namespace AdvectionCalculationsGUI
 			double dt = double.Parse(this.dt.Text);
 			List<Point> entryPoints = new List<Point>();
 			int segments = 20; //segments => points = segments - 1 + end_point //TODO
-			foreach (List<Point> line in lines)
+			foreach (List<Point> line in picture.Lines)
 			{
 				Point last = null;
 				foreach (Point p in line)
@@ -435,10 +214,11 @@ namespace AdvectionCalculationsGUI
 				}
 			}
 			Debug.WriteLine("N-points: " + entryPoints.Count);
-			threads = adv.Start(radius, steps, dt, entryPoints, 40, notifier); //TODO
+			threads = adv.Start(radius, steps, dt, dir, entryPoints, 40, notifier, worker); //TODO
 
 			Debug.WriteLine("Threads are creared, waiting untilthey all die");
 			int threadMax = threads.Count;
+			worker.ReportProgress(0);
 			while (threads.Count > 0)
 			{
 				notifier.WaitOne(2000);
@@ -451,8 +231,6 @@ namespace AdvectionCalculationsGUI
 					}
 				}
 				worker.ReportProgress((threadMax - threads.Count) * 1000 / threadMax);
-				//Debug.WriteLine("threads.Count " + threads.Count + " Max " + threadMax +
-				//" Fraction " + ((threadMax - threads.Count) * 1000 / threadMax) + "/" + 1000);
 			}
 
 			worker.ReportProgress(0);
@@ -461,7 +239,7 @@ namespace AdvectionCalculationsGUI
 			int resolution = int.Parse(this.resolution.Text);
 			FTLEField field = new FTLEField(ids, resolution);
 
-			threads = field.PrepareField(notifier, sls);
+			threads = field.PrepareField(notifier, sls, 40);
 			threadMax = threads.Count;
 			while (threads.Count > 0)
 			{
@@ -480,7 +258,7 @@ namespace AdvectionCalculationsGUI
 			}
 
 			worker.ReportProgress(0);
-			threads = field.Start(notifier, resolution);
+			threads = field.Start(notifier, resolution, 40);
 			Debug.WriteLine("Threads are done, waiting for their end");
 			threadMax = threads.Count;
 			while (threads.Count > 0)
@@ -619,6 +397,105 @@ namespace AdvectionCalculationsGUI
 		private void WorkerDone(object sender, RunWorkerCompletedEventArgs e)
 		{
 			SetAllEnabled(true);
+		}
+
+		private void ChangeRotationIncrease(object sender, EventArgs e, int axis)
+		{
+			int valx = int.Parse(xAxisValue.Text);
+			int valy = int.Parse(yAxisValue.Text);
+			int valz = int.Parse(zAxisValue.Text);
+			switch (axis)
+			{
+				case 1:
+					valx = (valx + 90) % 360;
+					break;
+				case 2:
+					valy = (valy + 90) % 360;
+					break;
+				case 3:
+					valz = (valz + 90) % 360;
+					break;
+				default:
+					return;
+			}
+			xAxisValue.Text = "" + valx;
+			yAxisValue.Text = "" + valy;
+			zAxisValue.Text = "" + valz;
+			picture.RotateObject(Deg2Rad(valx), Deg2Rad(valy), Deg2Rad(valz));
+			picture.DrawScaledObjectOn(canvas);
+		}
+
+		private void ChangeRotationDecrease(object sender, EventArgs e, int axis)
+		{
+			int valx = int.Parse(xAxisValue.Text);
+			int valy = int.Parse(yAxisValue.Text);
+			int valz = int.Parse(zAxisValue.Text);
+			switch (axis)
+			{
+				case 1:
+					valx = (valx - 90) % 360;
+					break;
+				case 2:
+					valy = (valy - 90) % 360;
+					break;
+				case 3:
+					valz = (valz - 90) % 360;
+					break;
+				default:
+					return;
+			}
+			xAxisValue.Text = "" + valx;
+			yAxisValue.Text = "" + valy;
+			zAxisValue.Text = "" + valz;
+			picture.RotateObject(Deg2Rad(valx), Deg2Rad(valy), Deg2Rad(valz));
+			picture.DrawScaledObjectOn(canvas);
+		}
+
+		private double Deg2Rad(int deg)
+		{
+			return (Math.PI / 180) * deg;
+		}
+
+		private void LoadData(object sender, DoWorkEventArgs e)
+		{
+			BackgroundWorker worker = sender as BackgroundWorker;
+			ids = new InputDataSet(selectDataDalog.FileName, double.Parse(voxelSize.Text), worker);
+		}
+
+		private void DataLoaded(object sender, RunWorkerCompletedEventArgs e)
+		{
+			List<Point> points = ids.GetPoints();
+			picture.Clear();
+
+			picture.MakeSelection(double.Parse(this.avDistance.Text), points);
+			dataLoaded = true;
+			picture.RotateObject(0, 0, 0);
+			picture.DrawScaledObjectOn(canvas);
+		}
+
+		private void Canvas_LoseFocus(object sender, EventArgs e)
+		{
+			Cursor.Show();
+			picture.UpdateMousePointer(canvas, -20, -20);
+		}
+
+		private void MaxLevelChange(object sender, EventArgs e)
+		{
+			picture.ChangeLevel(levelTracker.Value, levelTracker.Maximum);
+			picture.DrawScaledObjectOn(canvas);
+		}
+
+		private void UpdateDirection(object sender, EventArgs e)
+		{
+			dir = 0;
+			if (this.direction.SelectedIndex == 0)
+			{
+				dir = 1;
+			}
+			else if (this.direction.SelectedIndex == 1)
+			{
+				dir = -1;
+			}
 		}
 	}
 }

@@ -36,6 +36,20 @@ namespace AdvectionCalculationsGUI
 			this.graphicsPanel = new System.Windows.Forms.TableLayoutPanel();
 			this.canvas_holder = new System.Windows.Forms.Panel();
 			this.canvas = new System.Windows.Forms.PictureBox();
+			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+			this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+			this.label1 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label3 = new System.Windows.Forms.Label();
+			this.xAxisValue = new System.Windows.Forms.Label();
+			this.yAxisValue = new System.Windows.Forms.Label();
+			this.zAxisValue = new System.Windows.Forms.Label();
+			this.xm90 = new System.Windows.Forms.Button();
+			this.ym90 = new System.Windows.Forms.Button();
+			this.zm90 = new System.Windows.Forms.Button();
+			this.yp90 = new System.Windows.Forms.Button();
+			this.zp90 = new System.Windows.Forms.Button();
+			this.xp90 = new System.Windows.Forms.Button();
 			this.startBtn = new System.Windows.Forms.Button();
 			this.settingsPanel = new System.Windows.Forms.Panel();
 			this.settingsTable = new System.Windows.Forms.TableLayoutPanel();
@@ -66,16 +80,21 @@ namespace AdvectionCalculationsGUI
 			this.selectDataDalog = new System.Windows.Forms.OpenFileDialog();
 			this.selectOutputFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
 			this.fieldNormilizerWorker = new System.ComponentModel.BackgroundWorker();
+			this.loadDataWorker = new System.ComponentModel.BackgroundWorker();
+			this.levelTracker = new System.Windows.Forms.TrackBar();
 			this.topLevelLayout.SuspendLayout();
 			this.graphicsPanel.SuspendLayout();
 			this.canvas_holder.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.canvas)).BeginInit();
+			this.tableLayoutPanel1.SuspendLayout();
+			this.tableLayoutPanel2.SuspendLayout();
 			this.settingsPanel.SuspendLayout();
 			this.settingsTable.SuspendLayout();
 			this.inputSettingsPanel.SuspendLayout();
 			this.inputSettingsTable.SuspendLayout();
 			this.outputSettingsPanel.SuspendLayout();
 			this.outputSettingsTable.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.levelTracker)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// topLevelLayout
@@ -104,6 +123,7 @@ namespace AdvectionCalculationsGUI
 			this.graphicsPanel.ColumnCount = 1;
 			this.graphicsPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
 			this.graphicsPanel.Controls.Add(this.canvas_holder, 0, 0);
+			this.graphicsPanel.Controls.Add(this.tableLayoutPanel1, 0, 1);
 			this.graphicsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.graphicsPanel.Location = new System.Drawing.Point(344, 3);
 			this.graphicsPanel.Name = "graphicsPanel";
@@ -135,7 +155,188 @@ namespace AdvectionCalculationsGUI
 			this.canvas.TabStop = false;
 			this.canvas.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Canvas_MouseClick);
 			this.canvas.MouseEnter += new System.EventHandler(this.Canvas_GetFocus);
+			this.canvas.MouseLeave += new System.EventHandler(this.Canvas_LoseFocus);
 			this.canvas.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Canvas_MouseMove);
+			// 
+			// tableLayoutPanel1
+			// 
+			this.tableLayoutPanel1.ColumnCount = 3;
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+			this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
+			this.tableLayoutPanel1.Controls.Add(this.levelTracker, 1, 0);
+			this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tableLayoutPanel1.Location = new System.Drawing.Point(1, 493);
+			this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+			this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+			this.tableLayoutPanel1.RowCount = 1;
+			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+			this.tableLayoutPanel1.Size = new System.Drawing.Size(1017, 89);
+			this.tableLayoutPanel1.TabIndex = 1;
+			// 
+			// tableLayoutPanel2
+			// 
+			this.tableLayoutPanel2.ColumnCount = 4;
+			this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+			this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+			this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+			this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+			this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
+			this.tableLayoutPanel2.Controls.Add(this.label2, 0, 1);
+			this.tableLayoutPanel2.Controls.Add(this.label3, 0, 2);
+			this.tableLayoutPanel2.Controls.Add(this.xAxisValue, 2, 0);
+			this.tableLayoutPanel2.Controls.Add(this.yAxisValue, 2, 1);
+			this.tableLayoutPanel2.Controls.Add(this.zAxisValue, 2, 2);
+			this.tableLayoutPanel2.Controls.Add(this.xm90, 1, 0);
+			this.tableLayoutPanel2.Controls.Add(this.ym90, 1, 1);
+			this.tableLayoutPanel2.Controls.Add(this.zm90, 1, 2);
+			this.tableLayoutPanel2.Controls.Add(this.yp90, 3, 1);
+			this.tableLayoutPanel2.Controls.Add(this.zp90, 3, 2);
+			this.tableLayoutPanel2.Controls.Add(this.xp90, 3, 0);
+			this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+			this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
+			this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+			this.tableLayoutPanel2.RowCount = 3;
+			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+			this.tableLayoutPanel2.Size = new System.Drawing.Size(305, 89);
+			this.tableLayoutPanel2.TabIndex = 0;
+			// 
+			// label1
+			// 
+			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(3, 0);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(70, 29);
+			this.label1.TabIndex = 0;
+			this.label1.Text = "X-axis";
+			this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			// 
+			// label2
+			// 
+			this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(3, 29);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(70, 29);
+			this.label2.TabIndex = 1;
+			this.label2.Text = "Y-axis";
+			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			// 
+			// label3
+			// 
+			this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(3, 58);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(70, 31);
+			this.label3.TabIndex = 2;
+			this.label3.Text = "Z-axis";
+			this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			// 
+			// xAxisValue
+			// 
+			this.xAxisValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.xAxisValue.AutoSize = true;
+			this.xAxisValue.Location = new System.Drawing.Point(155, 0);
+			this.xAxisValue.Name = "xAxisValue";
+			this.xAxisValue.Size = new System.Drawing.Size(70, 29);
+			this.xAxisValue.TabIndex = 3;
+			this.xAxisValue.Text = "0";
+			this.xAxisValue.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			// 
+			// yAxisValue
+			// 
+			this.yAxisValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.yAxisValue.AutoSize = true;
+			this.yAxisValue.Location = new System.Drawing.Point(155, 29);
+			this.yAxisValue.Name = "yAxisValue";
+			this.yAxisValue.Size = new System.Drawing.Size(70, 29);
+			this.yAxisValue.TabIndex = 4;
+			this.yAxisValue.Text = "0";
+			this.yAxisValue.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			// 
+			// zAxisValue
+			// 
+			this.zAxisValue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.zAxisValue.AutoSize = true;
+			this.zAxisValue.Location = new System.Drawing.Point(155, 58);
+			this.zAxisValue.Name = "zAxisValue";
+			this.zAxisValue.Size = new System.Drawing.Size(70, 31);
+			this.zAxisValue.TabIndex = 5;
+			this.zAxisValue.Text = "0";
+			this.zAxisValue.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			// 
+			// xm90
+			// 
+			this.xm90.Location = new System.Drawing.Point(79, 3);
+			this.xm90.Name = "xm90";
+			this.xm90.Size = new System.Drawing.Size(70, 23);
+			this.xm90.TabIndex = 6;
+			this.xm90.Text = "<";
+			this.xm90.UseVisualStyleBackColor = true;
+			// 
+			// ym90
+			// 
+			this.ym90.Location = new System.Drawing.Point(79, 32);
+			this.ym90.Name = "ym90";
+			this.ym90.Size = new System.Drawing.Size(70, 23);
+			this.ym90.TabIndex = 7;
+			this.ym90.Text = "<";
+			this.ym90.UseVisualStyleBackColor = true;
+			// 
+			// zm90
+			// 
+			this.zm90.Location = new System.Drawing.Point(79, 61);
+			this.zm90.Name = "zm90";
+			this.zm90.Size = new System.Drawing.Size(70, 23);
+			this.zm90.TabIndex = 8;
+			this.zm90.Text = "<";
+			this.zm90.UseVisualStyleBackColor = true;
+			// 
+			// yp90
+			// 
+			this.yp90.Location = new System.Drawing.Point(231, 32);
+			this.yp90.Name = "yp90";
+			this.yp90.Size = new System.Drawing.Size(71, 23);
+			this.yp90.TabIndex = 10;
+			this.yp90.Text = ">";
+			this.yp90.UseVisualStyleBackColor = true;
+			// 
+			// zp90
+			// 
+			this.zp90.Location = new System.Drawing.Point(231, 61);
+			this.zp90.Name = "zp90";
+			this.zp90.Size = new System.Drawing.Size(71, 23);
+			this.zp90.TabIndex = 11;
+			this.zp90.Text = ">";
+			this.zp90.UseVisualStyleBackColor = true;
+			// 
+			// xp90
+			// 
+			this.xp90.Location = new System.Drawing.Point(231, 3);
+			this.xp90.Name = "xp90";
+			this.xp90.Size = new System.Drawing.Size(71, 23);
+			this.xp90.TabIndex = 9;
+			this.xp90.Text = ">";
+			this.xp90.UseVisualStyleBackColor = true;
 			// 
 			// startBtn
 			// 
@@ -451,6 +652,7 @@ namespace AdvectionCalculationsGUI
 			this.direction.Name = "direction";
 			this.direction.Size = new System.Drawing.Size(103, 24);
 			this.direction.TabIndex = 12;
+			this.direction.SelectedIndexChanged += new System.EventHandler(this.UpdateDirection);
 			// 
 			// resolution
 			// 
@@ -506,9 +708,28 @@ namespace AdvectionCalculationsGUI
 			// 
 			// fieldNormilizerWorker
 			// 
-			this.fieldNormilizerWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+			this.fieldNormilizerWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.MakeCalculations);
 			this.fieldNormilizerWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.ProgressChanged);
 			this.fieldNormilizerWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.WorkerDone);
+			// 
+			// loadDataWorker
+			// 
+			this.loadDataWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.LoadData);
+			this.loadDataWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.ProgressChanged);
+			this.loadDataWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.DataLoaded);
+			// 
+			// levelTracker
+			// 
+			this.levelTracker.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.levelTracker.Location = new System.Drawing.Point(308, 3);
+			this.levelTracker.Maximum = 100;
+			this.levelTracker.Name = "levelTracker";
+			this.levelTracker.Size = new System.Drawing.Size(299, 83);
+			this.levelTracker.TabIndex = 1;
+			this.levelTracker.TickFrequency = 5;
+			this.levelTracker.TickStyle = System.Windows.Forms.TickStyle.Both;
+			this.levelTracker.Value = 100;
+			this.levelTracker.Scroll += new System.EventHandler(this.MaxLevelChange);
 			// 
 			// GUI
 			// 
@@ -524,6 +745,10 @@ namespace AdvectionCalculationsGUI
 			this.graphicsPanel.ResumeLayout(false);
 			this.canvas_holder.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.canvas)).EndInit();
+			this.tableLayoutPanel1.ResumeLayout(false);
+			this.tableLayoutPanel1.PerformLayout();
+			this.tableLayoutPanel2.ResumeLayout(false);
+			this.tableLayoutPanel2.PerformLayout();
 			this.settingsPanel.ResumeLayout(false);
 			this.settingsTable.ResumeLayout(false);
 			this.inputSettingsPanel.ResumeLayout(false);
@@ -532,6 +757,7 @@ namespace AdvectionCalculationsGUI
 			this.outputSettingsPanel.ResumeLayout(false);
 			this.outputSettingsTable.ResumeLayout(false);
 			this.outputSettingsTable.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.levelTracker)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -576,6 +802,22 @@ namespace AdvectionCalculationsGUI
 		private System.Windows.Forms.FolderBrowserDialog selectOutputFolderDialog;
 		private System.ComponentModel.BackgroundWorker fieldNormilizerWorker;
 		private PictureBox canvas;
+		private TableLayoutPanel tableLayoutPanel1;
+		private TableLayoutPanel tableLayoutPanel2;
+		private Label label1;
+		private Label label2;
+		private Label label3;
+		private Label xAxisValue;
+		private Label yAxisValue;
+		private Label zAxisValue;
+		private Button xm90;
+		private Button ym90;
+		private Button zm90;
+		private Button yp90;
+		private Button zp90;
+		private Button xp90;
+		private System.ComponentModel.BackgroundWorker loadDataWorker;
+		private TrackBar levelTracker;
 	}
 }
 

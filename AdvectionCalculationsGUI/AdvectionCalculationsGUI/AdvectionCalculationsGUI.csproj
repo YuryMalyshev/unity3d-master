@@ -93,6 +93,7 @@
     <Compile Include="src\InputDataSet.cs" />
     <Compile Include="src\Interpolator.cs" />
     <Compile Include="src\OrderedVoxel.cs" />
+    <Compile Include="src\Picture.cs" />
     <Compile Include="src\Point.cs" />
     <Compile Include="src\Seed.cs" />
     <Compile Include="src\SeedPoint.cs" />

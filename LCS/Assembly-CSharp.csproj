@@ -63,6 +63,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\CameraMovement.cs" />
     <Compile Include="Assets\code\DataSet_DEPRECATED.cs" />
     <Compile Include="Assets\code\FTLEField_DEPRECATED.cs" />
     <Compile Include="Assets\code\Interpolator_DEPRECATED.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Assets\code\Seed_DEPRECATED.cs" />
     <Compile Include="Assets\code\SeedPoint.cs" />
     <Compile Include="Assets\code\Square.cs" />
+    <Compile Include="Assets\code\SquareSimplified.cs" />
     <Compile Include="Assets\code\StartUp_DEPRECATED.cs" />
     <Compile Include="Assets\code\StreamLine_DEPRECATED.cs" />
     <Compile Include="Assets\code\Surface.cs" />

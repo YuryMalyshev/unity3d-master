@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Numerics;
@@ -22,7 +24,7 @@ namespace AdvectionCalculationsGUI.src
 		/// <param name="filepath"> Directory path to the file</param>
 		/// <param name="filename"> Name of the fle</param>
 		/// <param name="voxelSize"> Size of a cubic Voxel</param>
-		public InputDataSet(string filepath, double voxelSize)
+		public InputDataSet(string filepath, double voxelSize, BackgroundWorker worker)
 		{
 			culture.NumberFormat.NumberDecimalDigits = 2;
 			culture.NumberFormat.NumberDecimalSeparator = ".";
@@ -30,7 +32,15 @@ namespace AdvectionCalculationsGUI.src
 
 			this.voxelSize = voxelSize;
 			Voxels = new List<Voxel<Point>>();
+			int total;
+			using (StreamReader r = new StreamReader(filepath))
+			{
+				total = 0;
+				while (r.ReadLine() != null) { total++; }
+			}
 			StreamReader reader = new StreamReader(filepath);
+			int count = total;
+			worker.ReportProgress(0);
 			while (!reader.EndOfStream)
 			{
 				Point p = ParseLine(reader.ReadLine());
@@ -53,15 +63,28 @@ namespace AdvectionCalculationsGUI.src
 					}
 					else
 					{
-						double x = Math.Ceiling(p.Pos.X / voxelSize) * voxelSize + Voxels[0].vertices[3].X;
-						double y = Math.Ceiling(p.Pos.Y / voxelSize) * voxelSize + Voxels[0].vertices[3].Y;
-						double z = Math.Ceiling(p.Pos.Z / voxelSize) * voxelSize + Voxels[0].vertices[3].Z;
+						//double x = Math.Ceiling(p.Pos.X / voxelSize) * voxelSize + Voxels[0].vertices[3].X;
+						//double y = Math.Ceiling(p.Pos.Y / voxelSize) * voxelSize + Voxels[0].vertices[3].Y;
+						//double z = Math.Ceiling(p.Pos.Z / voxelSize) * voxelSize + Voxels[0].vertices[3].Z;
+						double x = Math.Floor((p.Pos.X + Voxels[0].vertices[3].X) / voxelSize) * voxelSize - Voxels[0].vertices[3].X;
+						double y = Math.Floor((p.Pos.Y + Voxels[0].vertices[3].Y) / voxelSize) * voxelSize - Voxels[0].vertices[3].Y;
+						double z = Math.Floor((p.Pos.Z + Voxels[0].vertices[3].Z) / voxelSize) * voxelSize - Voxels[0].vertices[3].Z;
+						if (p.Pos.Z > 0)
+						{
+							Debug.WriteLine("");
+						}
 						v = new Voxel<Point>(x, y, z, x + voxelSize, y + voxelSize, z + voxelSize);
 					}
-					v.AddPoint(p);
+					v.ForceAddPoint(p);
 					Voxels.Add(v);
 				}
+				count--;
+				if(count % 100 == 0)
+				{
+					worker.ReportProgress(((total - count) * 1000) / total);
+				}
 			}
+			worker.ReportProgress(1000);
 			reader.Close();
 			reader.Dispose();
 		}
@@ -123,7 +146,8 @@ namespace AdvectionCalculationsGUI.src
 				}
 			}
 			if (local.Count == 0)
-				throw new Exception("Point is outside of known boundary!");
+				return null;
+				//throw new Exception("Point is outside of known boundary!");
 
 			foreach (Voxel<Point> v in Voxels)
 			{

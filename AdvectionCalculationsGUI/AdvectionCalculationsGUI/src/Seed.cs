@@ -13,7 +13,7 @@ namespace AdvectionCalculationsGUI.src
 		}
 		private Point center;
 		private readonly Dictionary<Direction, Point> pseudoparticles;
-		private readonly double radius;
+		private readonly float radius;
 		private double FTLE;
 		private readonly InputDataSet ids;
 		public Seed(Point center, float radius, InputDataSet ids)
@@ -110,6 +110,11 @@ namespace AdvectionCalculationsGUI.src
 			{
 				FTLE = 0;
 			}
+		}
+
+		public Seed Clone()
+		{
+			return new Seed((Point)center.Clone(), radius, ids);
 		}
 
 		public SeedPoint Simplify()
