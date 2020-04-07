@@ -19,7 +19,6 @@ namespace AdvectionCalculationsGUI
 		private InputDataSet ids;
 		private StreamLines sls;
 		//private FTLEField ffield;
-		private bool dataLoaded = false;
 		private int dir;
 
 		// Timing check
@@ -108,7 +107,7 @@ namespace AdvectionCalculationsGUI
 				{
 					this.label_selectFolder.Text = path.Substring(0, first + 1) + "..." + path.Substring(last);
 				}
-				sls = new StreamLines();
+				
 				this.startBtn.Enabled = true;
 			}
 		}
@@ -183,6 +182,7 @@ namespace AdvectionCalculationsGUI
 			BackgroundWorker worker = sender as BackgroundWorker;
 			worker.ReportProgress(0);
 			Debug.WriteLine("Start doing work!");
+			sls = new StreamLines();
 			Advection adv = new Advection(ids, sls);
 			// start advection routine
 			float radius = float.Parse(this.avDistance.Text) / 2;
@@ -206,7 +206,7 @@ namespace AdvectionCalculationsGUI
 								((p.Pos.Y - last.Pos.Y) * ratio) + last.Pos.Y,
 								((p.Pos.Z - last.Pos.Z) * ratio) + last.Pos.Z
 							);
-							entryPoints.Add(ids.GetPoint(pos, true));
+							entryPoints.Add(ids.GetPoint(pos));
 						}
 					}
 					entryPoints.Add(p);
@@ -279,7 +279,6 @@ namespace AdvectionCalculationsGUI
 
 			worker.ReportProgress(0);
 			field.CreateSquares(resolution, worker);
-
 			field.Serialize(selectOutputFolderDialog.SelectedPath, worker);
 			Debug.WriteLine("All done!");
 		}
@@ -468,7 +467,6 @@ namespace AdvectionCalculationsGUI
 			picture.Clear();
 
 			picture.MakeSelection(double.Parse(this.avDistance.Text), points);
-			dataLoaded = true;
 			picture.RotateObject(0, 0, 0);
 			picture.DrawScaledObjectOn(canvas);
 		}
@@ -495,6 +493,27 @@ namespace AdvectionCalculationsGUI
 			else if (this.direction.SelectedIndex == 1)
 			{
 				dir = -1;
+			}
+		}
+
+		private void DrawStreamLineChange(object sender, EventArgs e)
+		{
+			if (sls != null)
+			{
+				//Debug.WriteLine("sls: " + sls.GetStreamLines().Count);
+				if (checkBox1.Checked && sls.GetStreamLines().Count > 0)
+				{
+					picture.DrawStream(true, sls.GetStreamLines()[0]);
+				}
+				else
+				{
+					picture.DrawStream(false, null);
+				}
+				int valx = int.Parse(xAxisValue.Text);
+				int valy = int.Parse(yAxisValue.Text);
+				int valz = int.Parse(zAxisValue.Text);
+				picture.RotateObject(Deg2Rad(valx), Deg2Rad(valy), Deg2Rad(valz));
+				picture.DrawScaledObjectOn(canvas);
 			}
 		}
 	}

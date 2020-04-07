@@ -11,6 +11,7 @@ using UnityEngine;
 class Visualization : MonoBehaviour
 {
 	public Shader shader;
+	public Camera camera;
 	//private List<Square<SeedPoint>> squares;
 	private List<SquareSimplified> squares;
 	int[] meshtriangles;
@@ -95,7 +96,7 @@ class Visualization : MonoBehaviour
 	{
 		if (status == DrawStatus.waiting)
 		{
-			// Do nothing
+			MoveObject();
 			if (newtask)
 			{
 				task_param.Item1.Start(task_param.Item2);
@@ -113,6 +114,40 @@ class Visualization : MonoBehaviour
 			surface.UpdateTriangles(meshtriangles);
 			status = DrawStatus.waiting;
 		}
+	}
+
+	private Vector3 lastPosition;
+	private const float maxSize = 100;
+	private void MoveObject()
+	{
+		if (Input.GetMouseButtonDown(2) || Input.GetMouseButtonDown(1))
+		{
+			lastPosition = Input.mousePosition;
+		}
+		if (Input.GetMouseButton(2)) // Mouse Wheel pressed => pan
+		{
+			Vector3 change = Input.mousePosition - lastPosition;
+			//GetComponent<Camera>().transform.position -= change / (float)((maxSize * 1.1 - GetComponent<Camera>().orthographicSize) / 5);
+			surface.surface.transform.position += change/100;
+			lastPosition = Input.mousePosition;
+		}
+		else if (Input.GetMouseButton(1)) // RMB pressed => rotate
+		{
+			Vector3 change = Input.mousePosition - lastPosition;
+			surface.surface.transform.rotation = Quaternion.Euler(surface.surface.transform.rotation.eulerAngles + change);
+			/*Vector3 change = Input.mousePosition - lastPosition;
+			Vector3 lookAtPosition = GetComponent<Camera>().ScreenToWorldPoint(new Vector3(Screen.width / 2, Screen.height / 2, GetComponent<Camera>().nearClipPlane));
+			GetComponent<Camera>().transform.position -= change / (float)((maxSize * 1.1 - GetComponent<Camera>().orthographicSize) / 10);
+			GetComponent<Camera>().transform.LookAt(lookAtPosition);
+			//Debug.Log(change + " " + Input.mousePosition);
+			//camera.transform.rotation = Quaternion.Euler(camera.transform.rotation.eulerAngles + change / 90);*/
+			lastPosition = Input.mousePosition;
+		}
+		camera.orthographicSize -= (Input.mouseScrollDelta.y / 5);
+		if (camera.orthographicSize > 100)
+			camera.orthographicSize = 100f;
+		else if (camera.orthographicSize < 0.5)
+			camera.orthographicSize = 0.5f;
 	}
 
 	private float layerFraction = 0.5f;

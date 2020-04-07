@@ -31,7 +31,7 @@ namespace AdvectionCalculationsGUI.src
 			ManualResetEvent notifier = (ManualResetEvent)param[4];
 
 			int startstep = 0;
-			byte[] output = new byte[0];
+			//byte[] output = new byte[0];
 
 			// TODO: create file with header
 			if(direction != 0)
@@ -54,17 +54,16 @@ namespace AdvectionCalculationsGUI.src
 			{
 				semaphore.WaitOne();
 				Head.Calculate(dt);
-				Points.Add(Head.Simplify());
+				SeedPoint sp = Head.Simplify();
+				if (sp == null)
+				{
+					semaphore.Release();
+					return;
+				}
+				Points.Add(sp);
 				semaphore.Release();
 				// TODO: append into file
-				//if ((100 * (float)(i - startstep) / (steps - startstep)) % 25 == 0)
-				//	Console.WriteLine(ID + "\t:\t" + (100 * (i - startstep) / (steps - startstep)) + " % Done");
 			}
-		}
-
-		private void NegativeDirection()
-		{
-			
 		}
 		
 		public static void ResetCount()

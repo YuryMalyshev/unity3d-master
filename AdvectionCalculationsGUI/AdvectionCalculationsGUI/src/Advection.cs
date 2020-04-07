@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Threading;
 
 namespace AdvectionCalculationsGUI.src
@@ -30,6 +31,11 @@ namespace AdvectionCalculationsGUI.src
 			int count = total;
 			foreach (Point p in entryPoints)
 			{
+				if (p == null)
+				{
+					Debug.WriteLine("[SEVERE] Advection.Start: point p is null in entrypoints!");
+					continue;
+				}
 				StreamLine sl = new StreamLine(new Seed(p, radius, IDS));
 				SLS.AddLine(sl);
 				Thread t = new Thread(sl.CalculateStreamLine);

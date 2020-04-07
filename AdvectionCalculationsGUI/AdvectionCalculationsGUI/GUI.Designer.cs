@@ -50,6 +50,7 @@ namespace AdvectionCalculationsGUI
 			this.yp90 = new System.Windows.Forms.Button();
 			this.zp90 = new System.Windows.Forms.Button();
 			this.xp90 = new System.Windows.Forms.Button();
+			this.levelTracker = new System.Windows.Forms.TrackBar();
 			this.startBtn = new System.Windows.Forms.Button();
 			this.settingsPanel = new System.Windows.Forms.Panel();
 			this.settingsTable = new System.Windows.Forms.TableLayoutPanel();
@@ -81,20 +82,20 @@ namespace AdvectionCalculationsGUI
 			this.selectOutputFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
 			this.fieldNormilizerWorker = new System.ComponentModel.BackgroundWorker();
 			this.loadDataWorker = new System.ComponentModel.BackgroundWorker();
-			this.levelTracker = new System.Windows.Forms.TrackBar();
+			this.checkBox1 = new System.Windows.Forms.CheckBox();
 			this.topLevelLayout.SuspendLayout();
 			this.graphicsPanel.SuspendLayout();
 			this.canvas_holder.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.canvas)).BeginInit();
 			this.tableLayoutPanel1.SuspendLayout();
 			this.tableLayoutPanel2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.levelTracker)).BeginInit();
 			this.settingsPanel.SuspendLayout();
 			this.settingsTable.SuspendLayout();
 			this.inputSettingsPanel.SuspendLayout();
 			this.inputSettingsTable.SuspendLayout();
 			this.outputSettingsPanel.SuspendLayout();
 			this.outputSettingsTable.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.levelTracker)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// topLevelLayout
@@ -166,13 +167,14 @@ namespace AdvectionCalculationsGUI
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
 			this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
 			this.tableLayoutPanel1.Controls.Add(this.levelTracker, 1, 0);
+			this.tableLayoutPanel1.Controls.Add(this.checkBox1, 2, 0);
 			this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tableLayoutPanel1.Location = new System.Drawing.Point(1, 493);
 			this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
 			this.tableLayoutPanel1.Name = "tableLayoutPanel1";
 			this.tableLayoutPanel1.RowCount = 1;
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 89F));
 			this.tableLayoutPanel1.Size = new System.Drawing.Size(1017, 89);
 			this.tableLayoutPanel1.TabIndex = 1;
 			// 
@@ -337,6 +339,19 @@ namespace AdvectionCalculationsGUI
 			this.xp90.TabIndex = 9;
 			this.xp90.Text = ">";
 			this.xp90.UseVisualStyleBackColor = true;
+			// 
+			// levelTracker
+			// 
+			this.levelTracker.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.levelTracker.Location = new System.Drawing.Point(308, 3);
+			this.levelTracker.Maximum = 100;
+			this.levelTracker.Name = "levelTracker";
+			this.levelTracker.Size = new System.Drawing.Size(299, 83);
+			this.levelTracker.TabIndex = 1;
+			this.levelTracker.TickFrequency = 5;
+			this.levelTracker.TickStyle = System.Windows.Forms.TickStyle.Both;
+			this.levelTracker.Value = 100;
+			this.levelTracker.Scroll += new System.EventHandler(this.MaxLevelChange);
 			// 
 			// startBtn
 			// 
@@ -718,18 +733,16 @@ namespace AdvectionCalculationsGUI
 			this.loadDataWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.ProgressChanged);
 			this.loadDataWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.DataLoaded);
 			// 
-			// levelTracker
+			// checkBox1
 			// 
-			this.levelTracker.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.levelTracker.Location = new System.Drawing.Point(308, 3);
-			this.levelTracker.Maximum = 100;
-			this.levelTracker.Name = "levelTracker";
-			this.levelTracker.Size = new System.Drawing.Size(299, 83);
-			this.levelTracker.TabIndex = 1;
-			this.levelTracker.TickFrequency = 5;
-			this.levelTracker.TickStyle = System.Windows.Forms.TickStyle.Both;
-			this.levelTracker.Value = 100;
-			this.levelTracker.Scroll += new System.EventHandler(this.MaxLevelChange);
+			this.checkBox1.AutoSize = true;
+			this.checkBox1.Location = new System.Drawing.Point(613, 3);
+			this.checkBox1.Name = "checkBox1";
+			this.checkBox1.Size = new System.Drawing.Size(98, 21);
+			this.checkBox1.TabIndex = 2;
+			this.checkBox1.Text = "checkBox1";
+			this.checkBox1.UseVisualStyleBackColor = true;
+			this.checkBox1.CheckedChanged += new System.EventHandler(this.DrawStreamLineChange);
 			// 
 			// GUI
 			// 
@@ -749,6 +762,7 @@ namespace AdvectionCalculationsGUI
 			this.tableLayoutPanel1.PerformLayout();
 			this.tableLayoutPanel2.ResumeLayout(false);
 			this.tableLayoutPanel2.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.levelTracker)).EndInit();
 			this.settingsPanel.ResumeLayout(false);
 			this.settingsTable.ResumeLayout(false);
 			this.inputSettingsPanel.ResumeLayout(false);
@@ -757,7 +771,6 @@ namespace AdvectionCalculationsGUI
 			this.outputSettingsPanel.ResumeLayout(false);
 			this.outputSettingsTable.ResumeLayout(false);
 			this.outputSettingsTable.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.levelTracker)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -818,6 +831,7 @@ namespace AdvectionCalculationsGUI
 		private Button xp90;
 		private System.ComponentModel.BackgroundWorker loadDataWorker;
 		private TrackBar levelTracker;
+		private CheckBox checkBox1;
 	}
 }
 

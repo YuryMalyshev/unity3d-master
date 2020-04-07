@@ -63,6 +63,32 @@ namespace AdvectionCalculationsGUI.src
 				Debug.WriteLine("[WARNING] No streamsLines were created previously");
 				bulkList = new List<SeedPoint>();
 			}
+			double minFTLE = double.PositiveInfinity;
+			double maxFTLE = double.NegativeInfinity;
+			foreach(StreamLine sl in streamLines)
+			{
+				foreach(SeedPoint sp in sl.Points)
+				{
+					if(!double.IsNaN(sp.FTLE))
+					{
+						if (sp.FTLE < minFTLE)
+							minFTLE = sp.FTLE;
+						if (sp.FTLE > maxFTLE)
+							maxFTLE = sp.FTLE;
+					}
+				}
+			}
+			Debug.WriteLine("MinFTLE: " + minFTLE + "; MaxFTLE: " + maxFTLE);
+			foreach (StreamLine sl in streamLines)
+			{
+				foreach (SeedPoint sp in sl.Points)
+				{
+					if (double.IsNaN(sp.FTLE))
+					{
+						sp.FTLE = maxFTLE;
+					}
+				}
+			}
 			List<Thread> threads = new List<Thread>(streamLines.Count);
 			semaphore = new Semaphore(maxThreads, maxThreads);
 			foreach (StreamLine sl in streamLines)
@@ -130,7 +156,9 @@ namespace AdvectionCalculationsGUI.src
 			OrderedVoxel<SeedPoint> voxel = (OrderedVoxel<SeedPoint>)param[0];
 			ManualResetEvent notifier = (ManualResetEvent)param[1];
 			int resolution = (int)param[2];
-			float step = (float)(voxel.GetVoxelDimension() / resolution);
+			double diameter = voxel.GetVoxelDimension();
+			float step = (float)(diameter / resolution);
+			
 			for (int x = 0; x < resolution; x++)
 			{
 				for(int y = 0; y < resolution; y ++)
@@ -138,11 +166,14 @@ namespace AdvectionCalculationsGUI.src
 					semaphore.WaitOne();
 					for (int z = 0; z < resolution; z ++)
 					{
-						SeedPoint sp = Interpolator<SeedPoint>.NNInterpolatePoint(
-							new Vector3((x * step) + voxel.vertices[3].X,
-											(y * step) + voxel.vertices[3].Y, 
-											(z * step) + voxel.vertices[3].Z), 
-							bulkList);
+						Vector3 pos = new Vector3((x * step) + voxel.vertices[3].X,
+												(y * step) + voxel.vertices[3].Y,
+												(z * step) + voxel.vertices[3].Z);
+						SeedPoint sp = Interpolator<SeedPoint>.IWDInterpolatePoint(pos, bulkList, diameter);
+						if (sp == null)
+						{
+							sp = Interpolator<SeedPoint>.NNInterpolatePoint(pos, bulkList);
+						}
 						voxel.AddPoint(sp);
 						voxel.AddPointAt(sp, x, y, z);
 					}
@@ -248,7 +279,7 @@ namespace AdvectionCalculationsGUI.src
 		}
 
 		byte[] serialized;
-		public void Serialize(string path, BackgroundWorker worker) //TODO: MAKE IT QUICKER!
+		public void Serialize(string path, BackgroundWorker worker)
 		{
 			Debug.WriteLine("Serializing...");
 			worker.ReportProgress(0);

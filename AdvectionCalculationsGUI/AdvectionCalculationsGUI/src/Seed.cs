@@ -1,6 +1,7 @@
 ﻿using Accord.Math.Decompositions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace AdvectionCalculationsGUI.src
@@ -41,7 +42,7 @@ namespace AdvectionCalculationsGUI.src
 			Vector3 newPos = GetNewPos(center, dt);
 			try
 			{
-				center = Interpolator<Point>.NNInterpolatePoint(newPos, ids.GetPoints());
+				center = Interpolator<Point>.IWDInterpolatePoint(newPos, Interpolator<Point>.SelectVoxels(newPos, ids.Voxels), ids.voxelSize);
 			}
 			catch
 			{
@@ -58,57 +59,71 @@ namespace AdvectionCalculationsGUI.src
 					newPos = GetNewPos(pseudoparticles[d], dt);
 					try
 					{
-						pseudoparticles[d] = Interpolator<Point>.NNInterpolatePoint(newPos, ids.GetPoints());
+						pseudoparticles[d] = Interpolator<Point>.IWDInterpolatePoint(newPos, Interpolator<Point>.SelectVoxels(newPos, ids.Voxels), ids.voxelSize);
 					}
 					catch
 					{
+						Debug.WriteLine("Unable to interpolate particle " + d + " in seed " + center);
 						pseudoparticles[d] = null;
 					}
 				}
 			}
 			
-			double A, B, C, D, E, F;
-			if (pseudoparticles[Direction.North] == null || pseudoparticles[Direction.South] == null)
-			{
-				B = 0;
-				D = 0;
-			}
-			else
-			{
-				B = (pseudoparticles[Direction.North].Pos.X - pseudoparticles[Direction.South].Pos.X) / 2 * radius;
-				D = (pseudoparticles[Direction.North].Pos.Y - pseudoparticles[Direction.South].Pos.Y) / 2 * radius;
-			}
+			double A, B, C, D, E, F, G, H, I;
 			if (pseudoparticles[Direction.West] == null || pseudoparticles[Direction.East] == null)
 			{
 				A = 0;
-				C = 0;
+				D = 0;
+				G = 0;
 			}
 			else
 			{
 				A = (pseudoparticles[Direction.East].Pos.X - pseudoparticles[Direction.West].Pos.X) / 2 * radius;
-				C = (pseudoparticles[Direction.East].Pos.Y - pseudoparticles[Direction.West].Pos.Y) / 2 * radius;
+				D = (pseudoparticles[Direction.East].Pos.Y - pseudoparticles[Direction.West].Pos.Y) / 2 * radius;
+				G = (pseudoparticles[Direction.East].Pos.Z - pseudoparticles[Direction.West].Pos.Z) / 2 * radius;
 			}
-			if (pseudoparticles[Direction.Up] == null || pseudoparticles[Direction.Down] == null)
+			if (pseudoparticles[Direction.North] == null || pseudoparticles[Direction.South] == null)
 			{
+				B = 0;
 				E = 0;
-				F = 0;
+				H = 0;
 			}
 			else
 			{
-				E = (pseudoparticles[Direction.Up].Pos.X - pseudoparticles[Direction.Down].Pos.X) / 2 * radius;
+				B = (pseudoparticles[Direction.North].Pos.X - pseudoparticles[Direction.South].Pos.X) / 2 * radius;
+				E = (pseudoparticles[Direction.North].Pos.Y - pseudoparticles[Direction.South].Pos.Y) / 2 * radius;
+				H = (pseudoparticles[Direction.North].Pos.Z - pseudoparticles[Direction.South].Pos.Z) / 2 * radius;
+			}
+			if (pseudoparticles[Direction.Up] == null || pseudoparticles[Direction.Down] == null)
+			{
+				C = 0;
+				F = 0;
+				I = 0;
+			}
+			else
+			{
+				C = (pseudoparticles[Direction.Up].Pos.X - pseudoparticles[Direction.Down].Pos.X) / 2 * radius;
 				F = (pseudoparticles[Direction.Up].Pos.Y - pseudoparticles[Direction.Down].Pos.Y) / 2 * radius;
+				I = (pseudoparticles[Direction.Up].Pos.Z - pseudoparticles[Direction.Down].Pos.Z) / 2 * radius;
 			}
 
-			double[,] phi = new double[2, 2] { { A, B }, { C, D } };
+			double[,] phi = new double[3, 3] { { A, B, C }, { D, E, F },  { G, H, I } };
 
 			double[,] phiT = Accord.Math.Matrix.Transpose(phi);
 			double[,] phiTphi = Accord.Math.Matrix.Dot(phiT, phi);
-			EigenvalueDecomposition eig = new EigenvalueDecomposition(phiTphi, true, true);
-			double[] eigh = eig.RealEigenvalues;
-			FTLE = Math.Log(Accord.Math.Matrix.Max(eigh));
-			if(double.IsInfinity(FTLE))
+			try
 			{
-				FTLE = 0;
+				EigenvalueDecomposition eig = new EigenvalueDecomposition(phiTphi, true, true);
+				double[] eigh = eig.RealEigenvalues;
+				FTLE = Math.Log(Accord.Math.Matrix.Max(eigh));
+				if (double.IsInfinity(FTLE))
+				{
+					FTLE = double.NaN;
+				}
+			}
+			catch
+			{
+				FTLE = double.NaN;
 			}
 		}
 
@@ -119,12 +134,15 @@ namespace AdvectionCalculationsGUI.src
 
 		public SeedPoint Simplify()
 		{
+			if(center == null)
+				return null;
 			return new SeedPoint(center, FTLE);
 		}
 
 		private Vector3 GetNewPos(Point p, float dt)
 		{
-			return new Vector3(p.Pos.X + p.Vel.Y * dt, p.Pos.Y + p.Vel.X * dt, p.Pos.Z + p.Vel.Z * dt);
+			//return new Vector3(p.Pos.X + p.Vel.Y * dt, p.Pos.Y + p.Vel.X * dt, p.Pos.Z + p.Vel.Z * dt); // FOR GYRO
+			return new Vector3(p.Pos.X + p.Vel.Y * dt, p.Pos.Y + p.Vel.Z * dt, p.Pos.Z + p.Vel.X * dt); // FOR GUMA
 		}
 	}
 }

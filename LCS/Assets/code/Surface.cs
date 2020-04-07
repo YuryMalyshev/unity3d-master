@@ -9,7 +9,7 @@ namespace Assets.code
 {
 	public class Surface
 	{
-		readonly private GameObject surface;
+		public GameObject surface { get; private set; }
 		readonly private Mesh mesh;
 		
 		public Surface(Vector3[] vertices, Color[] colors, Shader shader)
@@ -19,7 +19,6 @@ namespace Assets.code
 				vertices = vertices,
 				colors = colors
 			};
-			this.shader = shader;
 			surface = new GameObject("0", typeof(MeshFilter), typeof(MeshRenderer));
 			surface.GetComponent<MeshRenderer>().material = new Material(shader);
 			surface.GetComponent<MeshFilter>().mesh = mesh;

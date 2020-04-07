@@ -40,7 +40,8 @@ namespace AdvectionCalculationsGUI.src
 			}
 			StreamReader reader = new StreamReader(filepath);
 			int count = total;
-			worker.ReportProgress(0);
+			if(worker != null)
+				worker.ReportProgress(0);
 			while (!reader.EndOfStream)
 			{
 				Point p = ParseLine(reader.ReadLine());
@@ -78,10 +79,12 @@ namespace AdvectionCalculationsGUI.src
 				count--;
 				if(count % 100 == 0)
 				{
-					worker.ReportProgress(((total - count) * 1000) / total);
+					if (worker != null)
+						worker.ReportProgress(((total - count) * 1000) / total);
 				}
 			}
-			worker.ReportProgress(1000);
+			if (worker != null)
+				worker.ReportProgress(1000);
 			reader.Close();
 			reader.Dispose();
 		}
@@ -119,42 +122,9 @@ namespace AdvectionCalculationsGUI.src
 			return points;
 		}
 
-		public Point GetPoint(Vector3 pos, bool simple)
-		{
-			if (simple)
-			{
-				return Interpolator<Point>.NNInterpolatePoint(pos, GetPoints());
-			}
-			else
-			{
-				return GetPoint(pos);
-			}
-		}
-
 		public Point GetPoint(Vector3 pos)
 		{
-			List<Voxel<Point>> local = new List< Voxel<Point>>();
-			foreach (Voxel<Point> v in Voxels)
-			{
-				if (v.IsPointInside(pos))
-				{
-					local.Add(v);
-					break;
-				}
-			}
-			if (local.Count == 0)
-				return null;
-				//throw new Exception("Point is outside of known boundary!");
-
-			foreach (Voxel<Point> v in Voxels)
-			{
-				if (!v.Equals(local[0]) && v.IsNeighborOf(local[0]))
-				{
-					local.Add(v);
-				}
-			}
-
-			return Interpolator<Point>.NNInterpolatePoint(pos, GetPoints());
+			return Interpolator<Point>.IWDInterpolatePoint(pos, Interpolator<Point>.SelectVoxels(pos, Voxels), voxelSize);
 		}
 	}
 }

@@ -24,6 +24,11 @@ namespace AdvectionCalculationsGUI.src
 		public List<Point> PointsToDraw { get; private set; }
 		private List<Vector3> pointsToDrawLocation;
 
+		private StreamLine streamLine = null;
+		private List<Vector3> streamLineLocation = null;
+		
+		private bool drawStreamLine = false;
+
 		double xMin = 0;
 		double xMax = 0;
 		double yMin = 0;
@@ -103,6 +108,20 @@ namespace AdvectionCalculationsGUI.src
 			}
 		}
 
+		public void DrawStream(bool draw, StreamLine s)
+		{
+			drawStreamLine = draw;
+			streamLine = s;
+			if (s != null)
+			{
+				streamLineLocation = new List<Vector3>(s.Points.Count);
+				foreach(SeedPoint p in s.Points)
+				{
+					streamLineLocation.Add(p.Pos);
+				}
+			}
+		}
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -176,6 +195,16 @@ namespace AdvectionCalculationsGUI.src
 					linesLocation[i][j] = new Vector3(pos[0], pos[1], pos[2]);
 				}
 			}
+			if(streamLine != null && drawStreamLine)
+			{
+				//Debug.WriteLine("Drawing stream lines. Number of points: " + streamLineLocation.Count);
+				for(int i = 0; i < streamLineLocation.Count; i++)
+				{
+					streamLine.Points[i].Pos.CopyTo(pos);
+					pos = Accord.Math.Matrix.Dot(pos, rmf);
+					streamLineLocation[i] = new Vector3(pos[0], pos[1], pos[2]); 
+				}
+			}
 		}
 
 		public void FinishLine()
@@ -216,6 +245,25 @@ namespace AdvectionCalculationsGUI.src
 												(float)(p.Y * ratio + offY - dotPen.Width / 2),
 												dotPen.Width, dotPen.Width);
 				}
+			}
+			if(drawStreamLine && streamLine != null)
+			{
+				Pen streamPen = new Pen(Color.Red);
+				Vector3 last = Vector3.Zero;
+				int pX = 0, pY = 0, lastX, lastY;
+				foreach (Vector3 p in streamLineLocation)
+				{
+					pX = (int)((float)(p.X * ratio + offX - dotPen.Width));
+					pY = (int)((float)(p.Y * ratio + offY - dotPen.Width));
+					if (!last.Equals(Vector3.Zero))
+					{
+						lastX = (int)((float)(last.X * ratio + offX - dotPen.Width));
+						lastY = (int)((float)(last.Y * ratio + offY - dotPen.Width));
+						g.DrawLine(streamPen, lastX, lastY, pX, pY);
+					}
+					last = p;
+				}
+				streamPen.Dispose();
 			}
 			g.Dispose();
 			canvas.Image = completeBackground;
