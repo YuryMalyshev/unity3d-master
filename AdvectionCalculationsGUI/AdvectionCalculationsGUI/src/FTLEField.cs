@@ -224,19 +224,14 @@ namespace AdvectionCalculationsGUI.src
 
 						Square<SeedPoint> sq;
 
-						sq = new Square<SeedPoint>(vertices[1], vertices[2], vertices[6], vertices[5]);
+						sq = new Square<SeedPoint>(vertices[1], vertices[2], vertices[0], vertices[5]);
 						if (sq.IsComplete()) squares.Add(sq);
-						sq = new Square<SeedPoint>(vertices[0], vertices[3], vertices[7], vertices[4]);
-						if (sq.IsComplete()) squares.Add(sq);
-
-						sq = new Square<SeedPoint>(vertices[2], vertices[3], vertices[7], vertices[6]);
-						if (sq.IsComplete()) squares.Add(sq);
-						sq = new Square<SeedPoint>(vertices[1], vertices[0], vertices[4], vertices[5]);
+						sq = new Square<SeedPoint>(vertices[3], vertices[0], vertices[2], vertices[7]);
 						if (sq.IsComplete()) squares.Add(sq);
 
-						sq = new Square<SeedPoint>(vertices[0], vertices[1], vertices[2], vertices[3]);
+						sq = new Square<SeedPoint>(vertices[4], vertices[5], vertices[7], vertices[0]);
 						if (sq.IsComplete()) squares.Add(sq);
-						sq = new Square<SeedPoint>(vertices[4], vertices[5], vertices[6], vertices[7]);
+						sq = new Square<SeedPoint>(vertices[6], vertices[7], vertices[5], vertices[1]);
 						if (sq.IsComplete()) squares.Add(sq);
 					}
 				}

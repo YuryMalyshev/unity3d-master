@@ -222,18 +222,17 @@ class Visualization : MonoBehaviour
 			meshtriangles[index] = s.B; index++;
 			meshtriangles[index] = s.C; index++;
 
+			meshtriangles[index] = s.A; index++;
+			meshtriangles[index] = s.D; index++;
+			meshtriangles[index] = s.B; index++;
+
+			meshtriangles[index] = s.A; index++;
+			meshtriangles[index] = s.C; index++;
+			meshtriangles[index] = s.D; index++;
+
 			meshtriangles[index] = s.C; index++;
 			meshtriangles[index] = s.B; index++;
-			meshtriangles[index] = s.A; index++;
-
-
-			meshtriangles[index] = s.A; index++;
 			meshtriangles[index] = s.D; index++;
-			meshtriangles[index] = s.C; index++;
-
-			meshtriangles[index] = s.C; index++;
-			meshtriangles[index] = s.D; index++;
-			meshtriangles[index] = s.A; index++;
 		}
 		Debug.Log("Done! Triangle count = " + meshtriangles.Length/6);
 		status = DrawStatus.ready;
