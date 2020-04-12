@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -17,15 +18,74 @@ namespace AdvectionCalculationsGUI
 		[STAThread]
 		static void Main()
 		{
+
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new GUI());
 			//InterpolationTest();
+			//InterpolationComparison();
+		}
+
+		private static void InterpolationComparison()
+		{
+			string filepath = "D:/Users/yrmal/Desktop/doublegyro";
+			double voxelSize = 0.25;
+			InputDataSet ids = new InputDataSet(filepath, voxelSize, null);
+			double xMax = 2;
+			double yMax = 1;
+			double step = 0.01;
+
+			Point[,] matrix = new Point[(int)(xMax / step), (int)(yMax / step)];
+
+			for(int x = 0; x < xMax / step; x++)
+			{
+				for(int y = 0; y < yMax / step; y++)
+				{
+					matrix[x, y] = Interpolator<Point>.NNInterpolatePoint(new Vector3((float)(x *step), (float)(y*step), 0), ids.GetPoints());
+				}
+			}
+			int pointSize = sizeof(float) * 6;
+			byte[] serialized = new byte[matrix.Length * pointSize];
+			int i = 0;
+			foreach (Point p in matrix)
+			{
+				if (p != null)
+					Array.Copy(p.Serialize(), 0, serialized, i * pointSize, pointSize);
+				i++;
+			}
+			using (FileStream fileStream = new FileStream("./NN.dat", FileMode.Create))
+			{
+				fileStream.Write(serialized, 0, serialized.Length);
+			}
+
+
+
+
+			for (int x = 0; x < xMax / step; x++)
+			{
+				for (int y = 0; y < yMax / step; y++)
+				{
+					matrix[x, y] = ids.GetPoint(new Vector3((float)(x * step), (float)(y * step), 0));
+				}
+			}
+			serialized = new byte[matrix.Length * pointSize];
+			i = 0;
+			foreach (Point p in matrix)
+			{
+				if(p != null)
+					Array.Copy(p.Serialize(), 0, serialized, i * pointSize, pointSize);
+				i++;
+			}
+			using (FileStream fileStream = new FileStream("./IDW.dat", FileMode.Create))
+			{
+				fileStream.Write(serialized, 0, serialized.Length);
+			}
+
 		}
 
 		private static void InterpolationTest()
 		{
-			string filepath = "D:/Users/yrmal/Desktop/app/doublegyro_Z";
+			string filepath = "D:/Users/yrmal/Desktop/doublegyro";
 			double voxelSize = 0.1;
 			InputDataSet ids = new InputDataSet(filepath, voxelSize, null);
 			Debug.WriteLine("voxels: " + ids.Voxels.Count() + " points/voxel " + ids.GetPoints().Count() / ids.Voxels.Count());

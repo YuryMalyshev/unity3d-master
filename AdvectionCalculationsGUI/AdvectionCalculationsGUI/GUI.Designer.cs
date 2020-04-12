@@ -36,7 +36,7 @@ namespace AdvectionCalculationsGUI
 			this.graphicsPanel = new System.Windows.Forms.TableLayoutPanel();
 			this.canvas_holder = new System.Windows.Forms.Panel();
 			this.canvas = new System.Windows.Forms.PictureBox();
-			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+			this.GraphicalInputPanel = new System.Windows.Forms.TableLayoutPanel();
 			this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
@@ -51,6 +51,9 @@ namespace AdvectionCalculationsGUI
 			this.zp90 = new System.Windows.Forms.Button();
 			this.xp90 = new System.Windows.Forms.Button();
 			this.levelTracker = new System.Windows.Forms.TrackBar();
+			this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+			this.displayStreamLines = new System.Windows.Forms.CheckBox();
+			this.streamLineDensity = new System.Windows.Forms.TrackBar();
 			this.startBtn = new System.Windows.Forms.Button();
 			this.settingsPanel = new System.Windows.Forms.Panel();
 			this.settingsTable = new System.Windows.Forms.TableLayoutPanel();
@@ -82,14 +85,15 @@ namespace AdvectionCalculationsGUI
 			this.selectOutputFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
 			this.fieldNormilizerWorker = new System.ComponentModel.BackgroundWorker();
 			this.loadDataWorker = new System.ComponentModel.BackgroundWorker();
-			this.checkBox1 = new System.Windows.Forms.CheckBox();
 			this.topLevelLayout.SuspendLayout();
 			this.graphicsPanel.SuspendLayout();
 			this.canvas_holder.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.canvas)).BeginInit();
-			this.tableLayoutPanel1.SuspendLayout();
+			this.GraphicalInputPanel.SuspendLayout();
 			this.tableLayoutPanel2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.levelTracker)).BeginInit();
+			this.tableLayoutPanel3.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.streamLineDensity)).BeginInit();
 			this.settingsPanel.SuspendLayout();
 			this.settingsTable.SuspendLayout();
 			this.inputSettingsPanel.SuspendLayout();
@@ -124,7 +128,7 @@ namespace AdvectionCalculationsGUI
 			this.graphicsPanel.ColumnCount = 1;
 			this.graphicsPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
 			this.graphicsPanel.Controls.Add(this.canvas_holder, 0, 0);
-			this.graphicsPanel.Controls.Add(this.tableLayoutPanel1, 0, 1);
+			this.graphicsPanel.Controls.Add(this.GraphicalInputPanel, 0, 1);
 			this.graphicsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.graphicsPanel.Location = new System.Drawing.Point(344, 3);
 			this.graphicsPanel.Name = "graphicsPanel";
@@ -159,24 +163,25 @@ namespace AdvectionCalculationsGUI
 			this.canvas.MouseLeave += new System.EventHandler(this.Canvas_LoseFocus);
 			this.canvas.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Canvas_MouseMove);
 			// 
-			// tableLayoutPanel1
+			// GraphicalInputPanel
 			// 
-			this.tableLayoutPanel1.ColumnCount = 3;
-			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
-			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
-			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
-			this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
-			this.tableLayoutPanel1.Controls.Add(this.levelTracker, 1, 0);
-			this.tableLayoutPanel1.Controls.Add(this.checkBox1, 2, 0);
-			this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tableLayoutPanel1.Location = new System.Drawing.Point(1, 493);
-			this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-			this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-			this.tableLayoutPanel1.RowCount = 1;
-			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 89F));
-			this.tableLayoutPanel1.Size = new System.Drawing.Size(1017, 89);
-			this.tableLayoutPanel1.TabIndex = 1;
+			this.GraphicalInputPanel.ColumnCount = 3;
+			this.GraphicalInputPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
+			this.GraphicalInputPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
+			this.GraphicalInputPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+			this.GraphicalInputPanel.Controls.Add(this.tableLayoutPanel2, 0, 0);
+			this.GraphicalInputPanel.Controls.Add(this.levelTracker, 1, 0);
+			this.GraphicalInputPanel.Controls.Add(this.tableLayoutPanel3, 2, 0);
+			this.GraphicalInputPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.GraphicalInputPanel.Enabled = false;
+			this.GraphicalInputPanel.Location = new System.Drawing.Point(1, 493);
+			this.GraphicalInputPanel.Margin = new System.Windows.Forms.Padding(0);
+			this.GraphicalInputPanel.Name = "GraphicalInputPanel";
+			this.GraphicalInputPanel.RowCount = 1;
+			this.GraphicalInputPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+			this.GraphicalInputPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 89F));
+			this.GraphicalInputPanel.Size = new System.Drawing.Size(1017, 89);
+			this.GraphicalInputPanel.TabIndex = 1;
 			// 
 			// tableLayoutPanel2
 			// 
@@ -352,6 +357,47 @@ namespace AdvectionCalculationsGUI
 			this.levelTracker.TickStyle = System.Windows.Forms.TickStyle.Both;
 			this.levelTracker.Value = 100;
 			this.levelTracker.Scroll += new System.EventHandler(this.MaxLevelChange);
+			// 
+			// tableLayoutPanel3
+			// 
+			this.tableLayoutPanel3.ColumnCount = 1;
+			this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+			this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+			this.tableLayoutPanel3.Controls.Add(this.displayStreamLines, 0, 0);
+			this.tableLayoutPanel3.Controls.Add(this.streamLineDensity, 0, 1);
+			this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tableLayoutPanel3.Location = new System.Drawing.Point(613, 3);
+			this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+			this.tableLayoutPanel3.RowCount = 2;
+			this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+			this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+			this.tableLayoutPanel3.Size = new System.Drawing.Size(401, 83);
+			this.tableLayoutPanel3.TabIndex = 2;
+			// 
+			// displayStreamLines
+			// 
+			this.displayStreamLines.AutoSize = true;
+			this.displayStreamLines.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.displayStreamLines.Location = new System.Drawing.Point(3, 3);
+			this.displayStreamLines.Name = "displayStreamLines";
+			this.displayStreamLines.Size = new System.Drawing.Size(395, 35);
+			this.displayStreamLines.TabIndex = 2;
+			this.displayStreamLines.Text = "Display Stream Lines";
+			this.displayStreamLines.UseVisualStyleBackColor = true;
+			this.displayStreamLines.CheckedChanged += new System.EventHandler(this.DrawStreamLineChange);
+			// 
+			// streamLineDensity
+			// 
+			this.streamLineDensity.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.streamLineDensity.LargeChange = 2;
+			this.streamLineDensity.Location = new System.Drawing.Point(3, 44);
+			this.streamLineDensity.Minimum = 1;
+			this.streamLineDensity.Name = "streamLineDensity";
+			this.streamLineDensity.Size = new System.Drawing.Size(395, 36);
+			this.streamLineDensity.TabIndex = 3;
+			this.streamLineDensity.TabStop = false;
+			this.streamLineDensity.Value = 1;
+			this.streamLineDensity.Scroll += new System.EventHandler(this.DrawStreamLineChange);
 			// 
 			// startBtn
 			// 
@@ -733,17 +779,6 @@ namespace AdvectionCalculationsGUI
 			this.loadDataWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.ProgressChanged);
 			this.loadDataWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.DataLoaded);
 			// 
-			// checkBox1
-			// 
-			this.checkBox1.AutoSize = true;
-			this.checkBox1.Location = new System.Drawing.Point(613, 3);
-			this.checkBox1.Name = "checkBox1";
-			this.checkBox1.Size = new System.Drawing.Size(98, 21);
-			this.checkBox1.TabIndex = 2;
-			this.checkBox1.Text = "checkBox1";
-			this.checkBox1.UseVisualStyleBackColor = true;
-			this.checkBox1.CheckedChanged += new System.EventHandler(this.DrawStreamLineChange);
-			// 
 			// GUI
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -758,11 +793,14 @@ namespace AdvectionCalculationsGUI
 			this.graphicsPanel.ResumeLayout(false);
 			this.canvas_holder.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.canvas)).EndInit();
-			this.tableLayoutPanel1.ResumeLayout(false);
-			this.tableLayoutPanel1.PerformLayout();
+			this.GraphicalInputPanel.ResumeLayout(false);
+			this.GraphicalInputPanel.PerformLayout();
 			this.tableLayoutPanel2.ResumeLayout(false);
 			this.tableLayoutPanel2.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.levelTracker)).EndInit();
+			this.tableLayoutPanel3.ResumeLayout(false);
+			this.tableLayoutPanel3.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.streamLineDensity)).EndInit();
 			this.settingsPanel.ResumeLayout(false);
 			this.settingsTable.ResumeLayout(false);
 			this.inputSettingsPanel.ResumeLayout(false);
@@ -815,7 +853,7 @@ namespace AdvectionCalculationsGUI
 		private System.Windows.Forms.FolderBrowserDialog selectOutputFolderDialog;
 		private System.ComponentModel.BackgroundWorker fieldNormilizerWorker;
 		private PictureBox canvas;
-		private TableLayoutPanel tableLayoutPanel1;
+		private TableLayoutPanel GraphicalInputPanel;
 		private TableLayoutPanel tableLayoutPanel2;
 		private Label label1;
 		private Label label2;
@@ -831,7 +869,9 @@ namespace AdvectionCalculationsGUI
 		private Button xp90;
 		private System.ComponentModel.BackgroundWorker loadDataWorker;
 		private TrackBar levelTracker;
-		private CheckBox checkBox1;
+		private CheckBox displayStreamLines;
+		private TableLayoutPanel tableLayoutPanel3;
+		private TrackBar streamLineDensity;
 	}
 }
 
