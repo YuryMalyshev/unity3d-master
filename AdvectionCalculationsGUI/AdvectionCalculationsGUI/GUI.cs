@@ -76,7 +76,6 @@ namespace AdvectionCalculationsGUI
 
 				this.outputSettingsPanel.Enabled = false;
 				this.startBtn.Enabled = false;
-				this.GraphicalInputPanel.Enabled = false;
 			}
 		}
 
@@ -86,7 +85,6 @@ namespace AdvectionCalculationsGUI
 		private void LoadData_Click(object sender, EventArgs e)
 		{
 			this.outputSettingsPanel.Enabled = true;
-			this.GraphicalInputPanel.Enabled = true;
 			loadDataWorker.RunWorkerAsync();
 		}
 
@@ -393,7 +391,6 @@ namespace AdvectionCalculationsGUI
 			inputSettingsPanel.Enabled = enable;
 			outputSettingsPanel.Enabled = enable;
 			startBtn.Enabled = enable;
-			GraphicalInputPanel.Enabled = enable;
 		}
 
 		private void WorkerDone(object sender, RunWorkerCompletedEventArgs e)
@@ -503,16 +500,10 @@ namespace AdvectionCalculationsGUI
 		{
 			if (sls != null)
 			{
-				Debug.WriteLine("sls: " + sls.GetStreamLines().Count);
-				if (displayStreamLines.Checked && sls.GetStreamLines().Count > 0)
+				//Debug.WriteLine("sls: " + sls.GetStreamLines().Count);
+				if (checkBox1.Checked && sls.GetStreamLines().Count > 0)
 				{
-					List<StreamLine> temp = new List<StreamLine>();
-					for (int i = 0; i < sls.GetStreamLines().Count; i += streamLineDensity.Value)
-					{
-						temp.Add(sls.GetStreamLines()[i]);
-					}
-					Debug.WriteLine("Drawing " + temp.Count + " streamlines");
-					picture.DrawStream(true, temp);
+					picture.DrawStream(true, sls.GetStreamLines()[0]);
 				}
 				else
 				{

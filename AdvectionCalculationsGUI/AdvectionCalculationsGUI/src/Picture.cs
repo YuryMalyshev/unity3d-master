@@ -24,8 +24,8 @@ namespace AdvectionCalculationsGUI.src
 		public List<Point> PointsToDraw { get; private set; }
 		private List<Vector3> pointsToDrawLocation;
 
-		private List<StreamLine> streamLines = null;
-		private List<List<Vector3>> streamLinesLocation = null;
+		private StreamLine streamLine = null;
+		private List<Vector3> streamLineLocation = null;
 		
 		private bool drawStreamLine = false;
 
@@ -108,21 +108,16 @@ namespace AdvectionCalculationsGUI.src
 			}
 		}
 
-		public void DrawStream(bool draw, List<StreamLine> ls)
+		public void DrawStream(bool draw, StreamLine s)
 		{
 			drawStreamLine = draw;
-			streamLines = ls;
-			if (ls != null)
+			streamLine = s;
+			if (s != null)
 			{
-				streamLinesLocation = new List<List<Vector3>>(ls.Count);
-				foreach (StreamLine s in ls)
+				streamLineLocation = new List<Vector3>(s.Points.Count);
+				foreach(SeedPoint p in s.Points)
 				{
-					List<Vector3> sll = new List<Vector3>(s.Points.Count);
-					foreach (SeedPoint p in s.Points)
-					{
-						sll.Add(p.Pos);
-					}
-					streamLinesLocation.Add(sll);
+					streamLineLocation.Add(p.Pos);
 				}
 			}
 		}
@@ -200,17 +195,14 @@ namespace AdvectionCalculationsGUI.src
 					linesLocation[i][j] = new Vector3(pos[0], pos[1], pos[2]);
 				}
 			}
-			if(streamLines != null && drawStreamLine)
+			if(streamLine != null && drawStreamLine)
 			{
-				for(int i = 0; i < streamLinesLocation.Count; i++)
+				//Debug.WriteLine("Drawing stream lines. Number of points: " + streamLineLocation.Count);
+				for(int i = 0; i < streamLineLocation.Count; i++)
 				{
-					Debug.WriteLine("Drawing stream lines. Number of points: " + streamLinesLocation[i].Count);
-					for (int j = 0; j < streamLinesLocation[i].Count; j++)
-					{
-						streamLines[i].Points[j].Pos.CopyTo(pos);
-						pos = Accord.Math.Matrix.Dot(pos, rmf);
-						streamLinesLocation[i][j] = new Vector3(pos[0], pos[1], pos[2]);
-					}
+					streamLine.Points[i].Pos.CopyTo(pos);
+					pos = Accord.Math.Matrix.Dot(pos, rmf);
+					streamLineLocation[i] = new Vector3(pos[0], pos[1], pos[2]); 
 				}
 			}
 		}
@@ -254,26 +246,22 @@ namespace AdvectionCalculationsGUI.src
 												dotPen.Width, dotPen.Width);
 				}
 			}
-			if(drawStreamLine && streamLines != null)
+			if(drawStreamLine && streamLine != null)
 			{
 				Pen streamPen = new Pen(Color.Red);
-				Vector3 last;
-				int pX, pY, lastX, lastY;
-				foreach (List<Vector3> streamLineLocation in streamLinesLocation)
+				Vector3 last = Vector3.Zero;
+				int pX = 0, pY = 0, lastX, lastY;
+				foreach (Vector3 p in streamLineLocation)
 				{
-					last = Vector3.Zero;
-					foreach (Vector3 p in streamLineLocation)
+					pX = (int)((float)(p.X * ratio + offX - dotPen.Width));
+					pY = (int)((float)(p.Y * ratio + offY - dotPen.Width));
+					if (!last.Equals(Vector3.Zero))
 					{
-						pX = (int)((float)(p.X * ratio + offX - dotPen.Width));
-						pY = (int)((float)(p.Y * ratio + offY - dotPen.Width));
-						if (!last.Equals(Vector3.Zero))
-						{
-							lastX = (int)((float)(last.X * ratio + offX - dotPen.Width));
-							lastY = (int)((float)(last.Y * ratio + offY - dotPen.Width));
-							g.DrawLine(streamPen, lastX, lastY, pX, pY);
-						}
-						last = p;
+						lastX = (int)((float)(last.X * ratio + offX - dotPen.Width));
+						lastY = (int)((float)(last.Y * ratio + offY - dotPen.Width));
+						g.DrawLine(streamPen, lastX, lastY, pX, pY);
 					}
+					last = p;
 				}
 				streamPen.Dispose();
 			}
