@@ -20,6 +20,7 @@ class Visualization : MonoBehaviour
 
 	public double AbsLevelMin = double.PositiveInfinity;
 	public double AbsLevelMax = double.NegativeInfinity;
+	private float centerX, centerY, centerZ;
 	public double levelRange;
 	public bool newtask = false;
 	private Surface surface;
@@ -30,74 +31,7 @@ class Visualization : MonoBehaviour
 	}
 	private DrawStatus status = DrawStatus.notReady;
 
-	void Start()
-	{
-		/*// Load data
-		//byte[] bytes = File.ReadAllBytes("D:/Users/yrmal/Desktop/FTLEField.dat");
-		Debug.Log("Trying to open : " + Application.dataPath + "/StreamingAssets/data/doublegyro/FTLEField.dat");
-		//string[] dirs = Directory.GetDirectories(Application.dataPath);
-		//Debug.Log("Folders in the " + Application.dataPath + " are: ");
-		//foreach(string dir in dirs)
-		//{
-		//	Debug.Log(dir);
-		//}
-
-		byte[] bytes = File.ReadAllBytes(Application.dataPath + "/StreamingAssets/data/doublegyro/FTLEField.dat");
-		int lineSize = sizeof(int) + sizeof(float) * 6 + sizeof(double);
-		points = new List<SeedPoint>(bytes.Length / lineSize);
-		byte[] subset = new byte[lineSize - sizeof(int)];
-		for (int i = 0; i < bytes.Length; i += lineSize)
-		{
-			Array.Copy(bytes, i + sizeof(int), subset, 0, subset.Length);
-			SeedPoint sp = SeedPoint.DeSerialize(subset);
-			points.Add(sp);
-			if (sp.FTLE < AbsLevelMin)
-			{
-				AbsLevelMin = sp.FTLE;
-			}
-			if (sp.FTLE > AbsLevelMax)
-			{
-				AbsLevelMax = sp.FTLE;
-			}
-		}
-		Debug.Log("Min = " + AbsLevelMin + " Max = " + AbsLevelMax);
-		levelRange = AbsLevelMax - AbsLevelMin;
-
-		Vector3[] vertices = new Vector3[points.Count];
-		Color[] colors = new Color[points.Count];
-		SeedPoint temp_sp;
-		for (int i = 0; i < vertices.Length; i++)
-		{
-			temp_sp = points[i];
-			vertices[i] = new Vector3(temp_sp.Pos.X, temp_sp.Pos.Y, temp_sp.Pos.Z);
-			float num = (float)((temp_sp.FTLE - AbsLevelMin) / levelRange);
-			if (num > 0.5)
-			{
-				colors[i] = Color.Lerp(Color.green, Color.red, (num - 0.5f) * 2);
-			}
-			else
-			{
-				colors[i] = Color.Lerp(Color.blue, Color.green, num * 2);
-			}
-		}
-		surface = new Surface(vertices, colors, shader);
-
-		bytes = File.ReadAllBytes(Application.dataPath + "/StreamingAssets/data/doublegyro/Squares.dat");
-		lineSize = sizeof(int) * 4;
-		squares = new List<TetrahedronSimple>(bytes.Length / lineSize);
-		int[] square = new int[4];
-		for (int i = 0; i < bytes.Length; i += lineSize)
-		{
-			for (int j = 0; j < lineSize; j += sizeof(int))
-			{
-				int ID = BitConverter.ToInt32(bytes, i + j);
-				square[j / sizeof(int)] = ID;
-			}
-			squares.Add(new TetrahedronSimple(square[0], square[1], square[2], square[3]));
-		}
-		status = DrawStatus.waiting;
-		Debug.Log("Started! Amount of points " + points.Count + "; Amount of squares " + squares.Count);*/
-	}
+	void Start(){}
 
 	private Tuple<Thread, object> task_param;
 
@@ -110,6 +44,9 @@ class Visualization : MonoBehaviour
 		byte[] bytes = File.ReadAllBytes(dirpath + "/FTLEField.dat");
 		int lineSize = sizeof(int) + sizeof(float) * 6 + sizeof(double);
 		points = new List<SeedPoint>(bytes.Length / lineSize);
+		float minX = float.PositiveInfinity, minY = float.PositiveInfinity, minZ = float.PositiveInfinity,
+		maxX = float.NegativeInfinity, maxY = float.NegativeInfinity, maxZ = float.NegativeInfinity;
+
 		byte[] subset = new byte[lineSize - sizeof(int)];
 		for (int i = 0; i < bytes.Length; i += lineSize)
 		{
@@ -124,7 +61,25 @@ class Visualization : MonoBehaviour
 			{
 				AbsLevelMax = sp.FTLE;
 			}
+
+			if (minX > sp.Pos.X)
+				 minX = sp.Pos.X;
+			if (minY > sp.Pos.Y)
+				 minY = sp.Pos.Y;
+			if (minZ > sp.Pos.Z)
+				 minZ = sp.Pos.Z;
+			if (maxX < sp.Pos.X)
+				 maxX = sp.Pos.X;
+			if (maxY < sp.Pos.Y)
+				 maxY = sp.Pos.Y;
+			if (maxZ < sp.Pos.Z)
+				 maxZ = sp.Pos.Z;
+
 		}
+		centerX = (minX + maxX) / 2;
+		centerY = (minY + maxY) / 2;
+		centerZ = (minZ + maxZ) / 2;
+
 		Debug.Log("Min = " + AbsLevelMin + " Max = " + AbsLevelMax);
 		levelRange = AbsLevelMax - AbsLevelMin;
 
@@ -164,11 +119,21 @@ class Visualization : MonoBehaviour
 		Debug.Log("Started! Amount of points " + points.Count + "; Amount of squares " + squares.Count);
 	}
 
+	public Vector3 GetSurfaceCenter()
+	{
+		if (status == DrawStatus.notReady)
+			return Vector3.zero;
+		else
+		{
+			return new Vector3(centerX, centerY, centerZ);
+		}
+	}
+
 	void Update()
 	{
 		if (status == DrawStatus.waiting)
 		{
-			MoveObject();
+			//MoveObject();
 			if (newtask)
 			{
 				task_param.Item1.Start(task_param.Item2);
