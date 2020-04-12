@@ -204,7 +204,7 @@ namespace AdvectionCalculationsGUI.src
 			{
 				for(int i = 0; i < streamLinesLocation.Count; i++)
 				{
-					Debug.WriteLine("Drawing stream lines. Number of points: " + streamLinesLocation[i].Count);
+					//Debug.WriteLine("Drawing stream lines. Number of points: " + streamLinesLocation[i].Count);
 					for (int j = 0; j < streamLinesLocation[i].Count; j++)
 					{
 						streamLines[i].Points[j].Pos.CopyTo(pos);
@@ -217,7 +217,7 @@ namespace AdvectionCalculationsGUI.src
 
 		public void FinishLine()
 		{
-			if (Lines.Last().Count >= 2)
+			if (Lines.Last().Count >= 1)
 			{
 				Lines.Add(new List<Point>());
 				linesLocation.Add(new List<Vector3>());
@@ -299,6 +299,7 @@ namespace AdvectionCalculationsGUI.src
 				{
 					pX = (int)((float)(p.X * ratio + offX - dotPen.Width));
 					pY = (int)((float)(p.Y * ratio + offY - dotPen.Width));
+					g.DrawEllipse(linePen, pX - linePen.Width, pY - linePen.Width, linePen.Width*2, linePen.Width*2);
 					if (last != Vector3.Zero)
 					{
 						lastX = (int)((float)(last.X * ratio + offX - dotPen.Width));

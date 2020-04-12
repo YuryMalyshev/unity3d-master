@@ -141,8 +141,8 @@ namespace AdvectionCalculationsGUI.src
 
 		private Vector3 GetNewPos(Point p, float dt)
 		{
-			//return new Vector3(p.Pos.X + p.Vel.Y * dt, p.Pos.Y + p.Vel.X * dt, p.Pos.Z + p.Vel.Z * dt); // FOR GYRO
-			return new Vector3(p.Pos.X + p.Vel.Y * dt, p.Pos.Y + p.Vel.Z * dt, p.Pos.Z + p.Vel.X * dt); // FOR GUMA
+			return new Vector3(p.Pos.X + p.Vel.Y * dt, p.Pos.Y + p.Vel.X * dt, p.Pos.Z + p.Vel.Z * dt); // FOR GYRO
+			//return new Vector3(p.Pos.X + p.Vel.Y * dt, p.Pos.Y + p.Vel.Z * dt, p.Pos.Z + p.Vel.X * dt); // FOR GUMA
 		}
 	}
 }

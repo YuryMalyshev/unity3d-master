@@ -29,5 +29,11 @@ namespace Assets.code
 			surface.name = "TCount [" + (triangles.Length / 6) + "]";
 			surface.GetComponent<MeshFilter>().mesh.triangles = triangles;
 		}
+
+		public void Dispose()
+		{
+			UnityEngine.Object.Destroy(mesh);
+			UnityEngine.Object.Destroy(surface);
+		}
 	}
 }

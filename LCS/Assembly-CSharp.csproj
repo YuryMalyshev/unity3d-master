@@ -64,12 +64,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\CameraMovement.cs" />
+    <Compile Include="Assets\code\LoadDirectories.cs" />
     <Compile Include="Assets\code\Point.cs" />
     <Compile Include="Assets\code\SeedPoint.cs" />
-    <Compile Include="Assets\code\Square.cs" />
-    <Compile Include="Assets\code\SquareSimplified.cs" />
     <Compile Include="Assets\code\Surface.cs" />
+    <Compile Include="Assets\code\Tetrahedron.cs" />
+    <Compile Include="Assets\code\TetrahedronSimple.cs" />
+    <Compile Include="Assets\code\UIControl.cs" />
     <Compile Include="Assets\code\Visualization.cs" />
+    <Compile Include="Assets\TestInterpolation.cs" />
     <None Include="Assets\VertexColored.shader" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/UnityWS/unity3d-master/LCS/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>

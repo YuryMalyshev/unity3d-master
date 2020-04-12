@@ -13,7 +13,7 @@ class Visualization : MonoBehaviour
 	public Shader shader;
 	public Camera camera;
 	//private List<Square<SeedPoint>> squares;
-	private List<SquareSimplified> squares;
+	private List<TetrahedronSimple> squares;
 	int[] meshtriangles;
 	//private Dictionary<int, SeedPoint> points;
 	private List<SeedPoint> points;
@@ -32,8 +32,17 @@ class Visualization : MonoBehaviour
 
 	void Start()
 	{
-		// Load data
-		byte[] bytes = File.ReadAllBytes("D:/Users/yrmal/Desktop/FTLEField.dat");
+		/*// Load data
+		//byte[] bytes = File.ReadAllBytes("D:/Users/yrmal/Desktop/FTLEField.dat");
+		Debug.Log("Trying to open : " + Application.dataPath + "/StreamingAssets/data/doublegyro/FTLEField.dat");
+		//string[] dirs = Directory.GetDirectories(Application.dataPath);
+		//Debug.Log("Folders in the " + Application.dataPath + " are: ");
+		//foreach(string dir in dirs)
+		//{
+		//	Debug.Log(dir);
+		//}
+
+		byte[] bytes = File.ReadAllBytes(Application.dataPath + "/StreamingAssets/data/doublegyro/FTLEField.dat");
 		int lineSize = sizeof(int) + sizeof(float) * 6 + sizeof(double);
 		points = new List<SeedPoint>(bytes.Length / lineSize);
 		byte[] subset = new byte[lineSize - sizeof(int)];
@@ -73,9 +82,9 @@ class Visualization : MonoBehaviour
 		}
 		surface = new Surface(vertices, colors, shader);
 
-		bytes = File.ReadAllBytes("D:/Users/yrmal/Desktop/Squares.dat");
+		bytes = File.ReadAllBytes(Application.dataPath + "/StreamingAssets/data/doublegyro/Squares.dat");
 		lineSize = sizeof(int) * 4;
-		squares = new List<SquareSimplified>(bytes.Length / lineSize);
+		squares = new List<TetrahedronSimple>(bytes.Length / lineSize);
 		int[] square = new int[4];
 		for (int i = 0; i < bytes.Length; i += lineSize)
 		{
@@ -84,13 +93,76 @@ class Visualization : MonoBehaviour
 				int ID = BitConverter.ToInt32(bytes, i + j);
 				square[j / sizeof(int)] = ID;
 			}
-			squares.Add(new SquareSimplified(square[0], square[1], square[2], square[3]));
+			squares.Add(new TetrahedronSimple(square[0], square[1], square[2], square[3]));
+		}
+		status = DrawStatus.waiting;
+		Debug.Log("Started! Amount of points " + points.Count + "; Amount of squares " + squares.Count);*/
+	}
+
+	private Tuple<Thread, object> task_param;
+
+	public void LoadData(string dirpath)
+	{
+		if (surface != null)
+			surface.Dispose();
+
+		// Load data
+		byte[] bytes = File.ReadAllBytes(dirpath + "/FTLEField.dat");
+		int lineSize = sizeof(int) + sizeof(float) * 6 + sizeof(double);
+		points = new List<SeedPoint>(bytes.Length / lineSize);
+		byte[] subset = new byte[lineSize - sizeof(int)];
+		for (int i = 0; i < bytes.Length; i += lineSize)
+		{
+			Array.Copy(bytes, i + sizeof(int), subset, 0, subset.Length);
+			SeedPoint sp = SeedPoint.DeSerialize(subset);
+			points.Add(sp);
+			if (sp.FTLE < AbsLevelMin)
+			{
+				AbsLevelMin = sp.FTLE;
+			}
+			if (sp.FTLE > AbsLevelMax)
+			{
+				AbsLevelMax = sp.FTLE;
+			}
+		}
+		Debug.Log("Min = " + AbsLevelMin + " Max = " + AbsLevelMax);
+		levelRange = AbsLevelMax - AbsLevelMin;
+
+		Vector3[] vertices = new Vector3[points.Count];
+		Color[] colors = new Color[points.Count];
+		SeedPoint temp_sp;
+		for (int i = 0; i < vertices.Length; i++)
+		{
+			temp_sp = points[i];
+			vertices[i] = new Vector3(temp_sp.Pos.X, temp_sp.Pos.Y, temp_sp.Pos.Z);
+			float num = (float)((temp_sp.FTLE - AbsLevelMin) / levelRange);
+			if (num > 0.5)
+			{
+				colors[i] = Color.Lerp(Color.green, Color.red, (num - 0.5f) * 2);
+			}
+			else
+			{
+				colors[i] = Color.Lerp(Color.blue, Color.green, num * 2);
+			}
+		}
+		surface = new Surface(vertices, colors, shader);
+
+		bytes = File.ReadAllBytes(dirpath + "/Squares.dat");
+		lineSize = sizeof(int) * 4;
+		squares = new List<TetrahedronSimple>(bytes.Length / lineSize);
+		int[] square = new int[4];
+		for (int i = 0; i < bytes.Length; i += lineSize)
+		{
+			for (int j = 0; j < lineSize; j += sizeof(int))
+			{
+				int ID = BitConverter.ToInt32(bytes, i + j);
+				square[j / sizeof(int)] = ID;
+			}
+			squares.Add(new TetrahedronSimple(square[0], square[1], square[2], square[3]));
 		}
 		status = DrawStatus.waiting;
 		Debug.Log("Started! Amount of points " + points.Count + "; Amount of squares " + squares.Count);
 	}
-
-	private Tuple<Thread, object> task_param;
 
 	void Update()
 	{
@@ -205,8 +277,8 @@ class Visualization : MonoBehaviour
 		double Min = min_max.Item1;
 		double Max = min_max.Item2;
 
-		List<SquareSimplified> validSquares = new List<SquareSimplified>();
-		foreach(SquareSimplified s in squares)
+		List<TetrahedronSimple> validSquares = new List<TetrahedronSimple>();
+		foreach(TetrahedronSimple s in squares)
 		{
 			if(PointValid(s.A, Min, Max) && PointValid(s.B, Min, Max) && PointValid(s.C, Min, Max) && PointValid(s.D, Min, Max))
 			{
@@ -216,7 +288,7 @@ class Visualization : MonoBehaviour
 
 		meshtriangles = new int[(validSquares.Count * 2) * (3 * 2)]; // 2 per square, 3 per triangle, 2-sided
 		int index = 0;
-		foreach(SquareSimplified s in validSquares)
+		foreach(TetrahedronSimple s in validSquares)
 		{
 			meshtriangles[index] = s.A; index++;
 			meshtriangles[index] = s.B; index++;

@@ -12,3 +12,6 @@ AdvectionCalculationsGUI/AdvectionCalculationsGUI/bin/Debug/AdvectionCalculation
 *.exe
 AdvectionCalculationsGUI/AdvectionCalculationsGUI/bin/Debug/AdvectionCalculationsGUI.pdb
 *.pdb
+LCS/Build
+*.exe
+LCS/Library/PlayerDataCache

@@ -98,7 +98,7 @@ namespace AdvectionCalculationsGUI
 			if (selectOutputFolderDialog.ShowDialog() == DialogResult.OK)
 			{
 				string path = selectOutputFolderDialog.SelectedPath;
-				Debug.WriteLine("Selected " + path);
+				//Debug.WriteLine("Selected " + path);
 				int first = path.IndexOf('\\');
 				int last = path.LastIndexOf('\\');
 				if (first == last)
@@ -117,6 +117,7 @@ namespace AdvectionCalculationsGUI
 		private void Start_Click(object sender, EventArgs e)
 		{
 			SetAllEnabled(false);
+			displayStreamLines.Checked = false;
 			fieldNormilizerWorker.RunWorkerAsync();
 		}
 
@@ -318,7 +319,7 @@ namespace AdvectionCalculationsGUI
 
 		private void GenericTextChange(object sender, EventArgs e)
 		{
-			Debug.WriteLine(sender);
+			//Debug.WriteLine(sender);
 			System.Windows.Forms.TextBox tb = (System.Windows.Forms.TextBox)sender;
 			if (tb.Text.Length == 0)
 			{
@@ -376,7 +377,7 @@ namespace AdvectionCalculationsGUI
 
 		private void SecondsTextChange(object sender, EventArgs e)
 		{
-			Debug.WriteLine(",");
+			//Debug.WriteLine(",");
 		}
 
 		private void GenericTextBoxLeave(object sender, EventArgs e)
@@ -484,6 +485,7 @@ namespace AdvectionCalculationsGUI
 		{
 			picture.ChangeLevel(levelTracker.Value, levelTracker.Maximum);
 			picture.DrawScaledObjectOn(canvas);
+			zLevel.Text = string.Format("Z-level {0,3:##0}%", levelTracker.Value); //Output  " 12.3"
 		}
 
 		private void UpdateDirection(object sender, EventArgs e)
@@ -503,7 +505,7 @@ namespace AdvectionCalculationsGUI
 		{
 			if (sls != null)
 			{
-				Debug.WriteLine("sls: " + sls.GetStreamLines().Count);
+				//Debug.WriteLine("sls: " + sls.GetStreamLines().Count);
 				if (displayStreamLines.Checked && sls.GetStreamLines().Count > 0)
 				{
 					List<StreamLine> temp = new List<StreamLine>();
@@ -511,7 +513,7 @@ namespace AdvectionCalculationsGUI
 					{
 						temp.Add(sls.GetStreamLines()[i]);
 					}
-					Debug.WriteLine("Drawing " + temp.Count + " streamlines");
+					//Debug.WriteLine("Drawing " + temp.Count + " streamlines");
 					picture.DrawStream(true, temp);
 				}
 				else
