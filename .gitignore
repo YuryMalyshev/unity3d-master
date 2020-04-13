@@ -15,3 +15,5 @@ AdvectionCalculationsGUI/AdvectionCalculationsGUI/bin/Debug/AdvectionCalculation
 LCS/Build
 *.exe
 LCS/Library/PlayerDataCache
+*.log
+LCS/Library
